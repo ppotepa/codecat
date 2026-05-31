@@ -12,7 +12,7 @@ The goal is not to make a pretty human report. The goal is to produce a stable t
 - deterministic ordering
 - no `bin/`, `obj/`, `node_modules/`, `target/`, `.venv/`, `.gradle/`, build caches, or previous `codecat` outputs
 
-Defaults are intentionally restrictive. Hidden directories are skipped unless explicitly allowed by the scanner, common binary/asset extensions are ignored before plugin matching, and files larger than 250 KB are skipped unless `--max-file-bytes` is increased.
+Defaults are intentionally restrictive. The scanner uses `global deny -> plugin allowlist match -> safety filters -> include`. Hidden directories are skipped unless explicitly allowed by the scanner, common binary/asset extensions are ignored before plugin matching, and files larger than 250 KB are skipped unless `--max-file-bytes` is increased.
 
 ## Usage
 
@@ -90,7 +90,7 @@ ITEMS_SKIPPED: 37
 WARNINGS: 0
 SKIPPED_BY_REASON: ignored_directory=10;no_plugin_match=27
 
-<<<FILE path="Program.cs" plugin="csharp" lang="csharp" lines="80" bytes="2048" sha256="...">>>
+<<<FILE path="Program.cs" plugin="csharp" lang="csharp" reason="extension:.cs" lines="80" bytes="2048" sha256="...">>>
 ...
 <<<END_FILE>>>
 

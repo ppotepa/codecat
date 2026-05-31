@@ -26,22 +26,18 @@ internal sealed class ExtensionPlugin : ICodecatPlugin
     public IReadOnlyCollection<string> IncludeRules { get; }
     public IReadOnlyCollection<string> IgnoreDirectoryRules { get; }
 
-    public string? TryGetLanguage(string relativePath)
+    public PluginMatch? TryMatchFile(string relativePath)
     {
         var fileName = Path.GetFileName(relativePath);
         if (_exactFileNames.TryGetValue(fileName, out var exactLanguage))
         {
-            return exactLanguage;
+            return new PluginMatch(Name, exactLanguage, $"filename:{fileName}");
         }
 
         var extension = Path.GetExtension(relativePath);
-        return _extensions.TryGetValue(extension, out var language) ? language : null;
-    }
-
-    public bool ShouldIncludeFile(string relativePath)
-    {
-        var fileName = Path.GetFileName(relativePath);
-        return _exactFileNames.ContainsKey(fileName) || _extensions.ContainsKey(Path.GetExtension(relativePath));
+        return _extensions.TryGetValue(extension, out var language)
+            ? new PluginMatch(Name, language, $"extension:{extension}")
+            : null;
     }
 
     public bool ShouldIgnoreDirectory(string relativePath)

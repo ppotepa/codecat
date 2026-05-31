@@ -10,19 +10,6 @@ internal sealed class ProjectScanner(
     ScanOptions options,
     Action<ScanProgress>? progress = null)
 {
-    private static readonly HashSet<string> AllowedHiddenDirectories = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".github"
-    };
-
-    private static readonly HashSet<string> AlwaysIgnoredFileExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".ai", ".avif", ".bmp", ".dll", ".dmg", ".doc", ".docx", ".eot", ".exe", ".gif",
-        ".ico", ".jar", ".jpeg", ".jpg", ".map", ".mp3", ".mp4", ".msi", ".otf", ".pdf",
-        ".png", ".pdb", ".ppt", ".pptx", ".so", ".sqlite", ".svg", ".tar", ".ttf", ".webm",
-        ".webp", ".woff", ".woff2", ".xls", ".xlsx", ".zip"
-    };
-
     private readonly string _outputPath = Path.GetFullPath(outputPath);
     private readonly List<CodecatFile> _files = [];
     private readonly List<ScanWarning> _warnings = [];
@@ -57,10 +44,11 @@ internal sealed class ProjectScanner(
         foreach (var directory in SafeEnumerateDirectories(root, currentDirectory))
         {
             var relative = ToRelativePath(root, directory);
-            if (IsHiddenDirectory(relative))
+            var globalDenyReason = GlobalScanRules.TryDenyDirectory(relative);
+            if (globalDenyReason is not null)
             {
-                Skip("hidden_directory");
-                ReportVerbose($"skip dir: {relative} (hidden directory)");
+                Skip(globalDenyReason);
+                ReportVerbose($"skip dir: {relative} ({globalDenyReason})");
                 continue;
             }
 
@@ -81,28 +69,25 @@ internal sealed class ProjectScanner(
             var fullPath = Path.GetFullPath(file);
             var relative = ToRelativePath(root, fullPath);
 
-            if (AlwaysIgnoredFileExtensions.Contains(Path.GetExtension(relative)))
+            var globalDenyReason = GlobalScanRules.TryDenyFileBeforePluginMatch(fullPath, relative, _outputPath);
+            if (globalDenyReason is not null)
             {
-                Skip("ignored_extension");
-                ReportVerbose($"skip file: {relative} (ignored extension)");
+                Skip(globalDenyReason);
+                ReportVerbose($"skip file: {relative} ({globalDenyReason})");
                 continue;
             }
 
-            if (string.Equals(fullPath, _outputPath, StringComparison.OrdinalIgnoreCase))
-            {
-                Skip("output_file");
-                continue;
-            }
-
-            var plugin = plugins.FirstOrDefault(candidate => candidate.ShouldIncludeFile(relative));
-            if (plugin is null)
+            var pluginMatch = plugins
+                .Select(plugin => plugin.TryMatchFile(relative))
+                .FirstOrDefault(match => match is not null);
+            if (pluginMatch is null)
             {
                 Skip("no_plugin_match");
                 ReportVerbose($"skip file: {relative} (no plugin match)");
                 continue;
             }
 
-            if (!TryReadFile(root, fullPath, relative, plugin))
+            if (!TryReadFile(fullPath, relative, pluginMatch))
             {
                 continue;
             }
@@ -111,37 +96,25 @@ internal sealed class ProjectScanner(
         }
     }
 
-    private bool TryReadFile(string root, string fullPath, string relative, ICodecatPlugin plugin)
+    private bool TryReadFile(string fullPath, string relative, PluginMatch pluginMatch)
     {
         try
         {
             var info = new FileInfo(fullPath);
-            if (info.Length > options.MaxFileBytes)
+            var safetyDenyReason = GlobalScanRules.TryDenyFileAfterPluginMatch(fullPath, info, options.MaxFileBytes);
+            if (safetyDenyReason is not null)
             {
-                Skip("too_large");
-                ReportVerbose($"skip file: {relative} (too large: {info.Length} bytes)");
-                return false;
-            }
-
-            if (LooksBinary(fullPath))
-            {
-                Skip("binary");
-                ReportVerbose($"skip file: {relative} (binary)");
-                return false;
-            }
-
-            if (IsCodecatOutput(fullPath))
-            {
-                Skip("codecat_output");
-                ReportVerbose($"skip file: {relative} (previous codecat output)");
+                Skip(safetyDenyReason);
+                ReportVerbose($"skip file: {relative} ({safetyDenyReason})");
                 return false;
             }
 
             var content = File.ReadAllText(fullPath, Encoding.UTF8);
             _files.Add(new CodecatFile(
                 RelativePath: relative,
-                Plugin: plugin.Name,
-                Language: plugin.TryGetLanguage(relative) ?? "text",
+                Plugin: pluginMatch.PluginName,
+                Language: pluginMatch.Language,
+                Reason: pluginMatch.Reason,
                 Bytes: info.Length,
                 Lines: CountLines(content),
                 Sha256: ComputeSha256(fullPath),
@@ -222,28 +195,6 @@ internal sealed class ProjectScanner(
     {
         var relative = Path.GetRelativePath(root, fullPath).Replace('\\', '/');
         return relative == "." ? "." : relative;
-    }
-
-    private static bool IsHiddenDirectory(string relativePath)
-    {
-        var directoryName = Path.GetFileName(relativePath);
-        return directoryName.StartsWith('.') && !AllowedHiddenDirectories.Contains(directoryName);
-    }
-
-    private static bool LooksBinary(string path)
-    {
-        Span<byte> buffer = stackalloc byte[512];
-        using var stream = File.OpenRead(path);
-        var read = stream.Read(buffer);
-        return buffer[..read].Contains((byte)0);
-    }
-
-    private static bool IsCodecatOutput(string path)
-    {
-        Span<byte> buffer = stackalloc byte[16];
-        using var stream = File.OpenRead(path);
-        var read = stream.Read(buffer);
-        return read >= 16 && Encoding.ASCII.GetString(buffer) == "CODECAT_VERSION:";
     }
 
     private static int CountLines(string content)

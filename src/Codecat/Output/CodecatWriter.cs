@@ -30,7 +30,7 @@ internal sealed class CodecatWriter
 
         foreach (var file in files)
         {
-            writer.WriteLine($"<<<FILE path=\"{EscapeAttribute(file.RelativePath)}\" plugin=\"{EscapeAttribute(file.Plugin)}\" lang=\"{EscapeAttribute(file.Language)}\" lines=\"{file.Lines}\" bytes=\"{file.Bytes}\" sha256=\"{file.Sha256}\">>>");
+            writer.WriteLine($"<<<FILE path=\"{EscapeAttribute(file.RelativePath)}\" plugin=\"{EscapeAttribute(file.Plugin)}\" lang=\"{EscapeAttribute(file.Language)}\" reason=\"{EscapeAttribute(file.Reason)}\" lines=\"{file.Lines}\" bytes=\"{file.Bytes}\" sha256=\"{file.Sha256}\">>>");
             writer.Write(file.Content);
             if (file.Content.Length > 0 && file.Content[^1] != '\n')
             {
