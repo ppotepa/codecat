@@ -35,6 +35,24 @@ dotnet publish src/Codecat -c Release -r win-x64
 
 The project is configured for Native AOT, so the published `Codecat.exe` does not require a separate .NET runtime on the target machine.
 
+Build release artifacts:
+
+```powershell
+.\scripts\build-release.ps1
+```
+
+The script restores the repo-local WiX tool, publishes a Native AOT build, creates a ZIP archive, and builds a Windows MSI installer.
+
+This creates:
+
+```text
+artifacts/release/codecat-0.1.0-win-x64/
+artifacts/release/codecat-0.1.0-win-x64.zip
+artifacts/release/codecat-0.1.0-win-x64.msi
+```
+
+The MSI installs `Codecat.exe` into `Program Files\Codecat` and adds that folder to the system `PATH`.
+
 ## Output Shape
 
 ```text
@@ -112,6 +130,8 @@ Planned directions include configurable plugin rules, size limits, explicit incl
 ## Repository Layout
 
 ```text
+installer/wix/  Windows MSI definition
+scripts/        release/build scripts
 src/Codecat/
   Cli/        command-line parsing
   Output/     concat.txt writer

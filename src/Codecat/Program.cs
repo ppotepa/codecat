@@ -3,6 +3,12 @@ using Codecat.Output;
 using Codecat.Plugins;
 using Codecat.Scanning;
 
+if (args is ["-h"] or ["--help"])
+{
+    CliOptions.PrintUsage();
+    return 0;
+}
+
 var options = CliOptions.Parse(args);
 if (options is null)
 {
