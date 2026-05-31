@@ -159,6 +159,8 @@ This is the first working version. It focuses on:
 
 Planned directions include configurable plugin rules, size limits, explicit include/exclude patterns, and output variants.
 
+See [CHANGELOG.md](CHANGELOG.md) for release history.
+
 ## Repository Layout
 
 ```text
