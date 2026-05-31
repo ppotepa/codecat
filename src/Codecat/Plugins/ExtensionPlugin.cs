@@ -18,9 +18,13 @@ internal sealed class ExtensionPlugin : ICodecatPlugin
         _extensions = extensions.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
         _exactFileNames = (exactFileNames ?? new Dictionary<string, string>()).ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
         _ignoredDirectories = (ignoredDirectories ?? []).ToFrozenSet(StringComparer.OrdinalIgnoreCase);
+        IncludeRules = _extensions.Keys.Concat(_exactFileNames.Keys).Order(StringComparer.OrdinalIgnoreCase).ToArray();
+        IgnoreDirectoryRules = _ignoredDirectories.Order(StringComparer.OrdinalIgnoreCase).ToArray();
     }
 
     public string Name { get; }
+    public IReadOnlyCollection<string> IncludeRules { get; }
+    public IReadOnlyCollection<string> IgnoreDirectoryRules { get; }
 
     public string? TryGetLanguage(string relativePath)
     {

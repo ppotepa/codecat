@@ -200,8 +200,7 @@ internal static class PluginRegistry
                     [".css"] = "css",
                     [".scss"] = "scss",
                     [".sass"] = "sass",
-                    [".less"] = "less",
-                    [".svg"] = "svg"
+                    [".less"] = "less"
                 },
                 ignoredDirectories: ignored),
 

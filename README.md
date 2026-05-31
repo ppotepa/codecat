@@ -12,6 +12,8 @@ The goal is not to make a pretty human report. The goal is to produce a stable t
 - deterministic ordering
 - no `bin/`, `obj/`, `node_modules/`, `target/`, `.venv/`, `.gradle/`, build caches, or previous `codecat` outputs
 
+Defaults are intentionally restrictive. Hidden directories are skipped unless explicitly allowed by the scanner, common binary/asset extensions are ignored before plugin matching, and files larger than 250 KB are skipped unless `--max-file-bytes` is increased.
+
 ## Usage
 
 Run from source:
@@ -46,9 +48,9 @@ The script restores the repo-local WiX tool, publishes a Native AOT build, creat
 This creates:
 
 ```text
-artifacts/release/codecat-0.1.0-win-x64/
-artifacts/release/codecat-0.1.0-win-x64.zip
-artifacts/release/codecat-0.1.0-win-x64.msi
+artifacts/release/codecat-0.2.0-win-x64/
+artifacts/release/codecat-0.2.0-win-x64.zip
+artifacts/release/codecat-0.2.0-win-x64.msi
 ```
 
 The MSI installs `Codecat.exe` into `Program Files\Codecat` and adds that folder to the system `PATH`.
@@ -61,6 +63,18 @@ codecat --help
 
 Because Windows resolves executables case-insensitively, the installed `Codecat.exe` can be launched as `codecat` from any directory.
 
+Common options:
+
+```powershell
+codecat .                         # scan the current directory
+codecat . -o context.txt           # choose output file
+codecat . --quiet                  # suppress progress output
+codecat . --verbose                # print detailed skip information
+codecat . --max-file-bytes 250000  # skip larger files
+codecat --list-plugins             # show built-in plugin rules
+codecat --version
+```
+
 ## Output Shape
 
 ```text
@@ -70,6 +84,11 @@ TOTAL_FILES: 3
 TOTAL_LINES: 120
 TOTAL_BYTES: 4096
 PLUGIN_COUNTS: csharp=2;python=1
+DIRECTORIES_VISITED: 12
+FILES_SEEN: 40
+ITEMS_SKIPPED: 37
+WARNINGS: 0
+SKIPPED_BY_REASON: ignored_directory=10;no_plugin_match=27
 
 <<<FILE path="Program.cs" plugin="csharp" lang="csharp" lines="80" bytes="2048" sha256="...">>>
 ...
@@ -80,6 +99,11 @@ included_files=3
 total_lines=120
 total_bytes=4096
 plugin_counts=csharp=2;python=1
+directories_visited=12
+files_seen=40
+items_skipped=37
+warnings=0
+skipped_by_reason=ignored_directory=10;no_plugin_match=27
 <<<END_SUMMARY>>>
 ```
 
