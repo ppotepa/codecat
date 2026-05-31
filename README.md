@@ -48,9 +48,9 @@ The script restores the repo-local WiX tool, publishes a Native AOT build, creat
 This creates:
 
 ```text
-artifacts/release/codecat-0.2.0-win-x64/
-artifacts/release/codecat-0.2.0-win-x64.zip
-artifacts/release/codecat-0.2.0-win-x64.msi
+artifacts/release/codecat-0.2.1-win-x64/
+artifacts/release/codecat-0.2.1-win-x64.zip
+artifacts/release/codecat-0.2.1-win-x64.msi
 ```
 
 The MSI installs `Codecat.exe` into `Program Files\Codecat` and adds that folder to the system `PATH`.
