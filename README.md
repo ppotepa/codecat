@@ -53,6 +53,14 @@ artifacts/release/codecat-0.1.0-win-x64.msi
 
 The MSI installs `Codecat.exe` into `Program Files\Codecat` and adds that folder to the system `PATH`.
 
+After installing the MSI, open a new terminal and run:
+
+```powershell
+codecat --help
+```
+
+Because Windows resolves executables case-insensitively, the installed `Codecat.exe` can be launched as `codecat` from any directory.
+
 ## Output Shape
 
 ```text
