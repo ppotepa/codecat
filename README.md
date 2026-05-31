@@ -17,20 +17,20 @@ The goal is not to make a pretty human report. The goal is to produce a stable t
 Run from source:
 
 ```powershell
-dotnet run -- . -o concat.txt
+dotnet run --project src/Codecat -- . -o concat.txt
 ```
 
 Scan another project:
 
 ```powershell
-dotnet run -- D:\Git\my-app -o D:\Git\my-app\concat.txt
+dotnet run --project src/Codecat -- D:\Git\my-app -o D:\Git\my-app\concat.txt
 ```
 
 Publish a native Windows executable:
 
 ```powershell
-dotnet publish -c Release -r win-x64
-.\bin\Release\net10.0\win-x64\publish\Codecat.exe . -o concat.txt
+dotnet publish src/Codecat -c Release -r win-x64
+.\src\Codecat\bin\Release\net10.0\win-x64\publish\Codecat.exe . -o concat.txt
 ```
 
 The project is configured for Native AOT, so the published `Codecat.exe` does not require a separate .NET runtime on the target machine.
@@ -108,3 +108,17 @@ This is the first working version. It focuses on:
 - Native AOT publishing
 
 Planned directions include configurable plugin rules, size limits, explicit include/exclude patterns, and output variants.
+
+## Repository Layout
+
+```text
+src/Codecat/
+  Cli/        command-line parsing
+  Output/     concat.txt writer
+  Plugins/    built-in language/ecosystem rules
+  Scanning/   recursive project scanner
+```
+
+## License
+
+MIT
