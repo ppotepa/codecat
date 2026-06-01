@@ -73,6 +73,11 @@ internal static class GlobalScanRules
         Span<byte> buffer = stackalloc byte[16];
         using var stream = File.OpenRead(path);
         var read = stream.Read(buffer);
-        return read >= 16 && Encoding.ASCII.GetString(buffer) == "CODECAT_VERSION:";
+        if (read >= 16 && Encoding.ASCII.GetString(buffer) == "CODECAT_VERSION:")
+        {
+            return true;
+        }
+
+        return read >= 4 && Encoding.ASCII.GetString(buffer[..4]) == "CC1|";
     }
 }

@@ -48,9 +48,9 @@ The script restores the repo-local WiX tool, publishes a Native AOT build, creat
 This creates:
 
 ```text
-artifacts/release/codecat-0.2.1-win-x64/
-artifacts/release/codecat-0.2.1-win-x64.zip
-artifacts/release/codecat-0.2.1-win-x64.msi
+artifacts/release/codecat-0.3.0-win-x64/
+artifacts/release/codecat-0.3.0-win-x64.zip
+artifacts/release/codecat-0.3.0-win-x64.msi
 ```
 
 The MSI installs `Codecat.exe` into `Program Files\Codecat` and adds that folder to the system `PATH`.
@@ -71,6 +71,7 @@ codecat . -o context.txt           # choose output file
 codecat . --quiet                  # suppress progress output
 codecat . --verbose                # print detailed skip information
 codecat . --max-file-bytes 250000  # skip larger files
+codecat . --mini                   # compact output plus safe minification
 codecat --list-plugins             # show built-in plugin rules
 codecat --version
 ```
@@ -108,6 +109,34 @@ skipped_by_reason=ignored_directory=10;no_plugin_match=27
 ```
 
 Plugins are compiled into the binary. This keeps the first version compatible with Native AOT and avoids dynamic loading/reflection constraints.
+
+## Mini Output
+
+`--mini` switches to a compact container format and runs only registered safe content minifiers. If a language has no minifier, file content is preserved apart from output line-ending normalization.
+
+Currently minified languages:
+
+```text
+json
+xml
+css
+scss
+sass
+less
+```
+
+Mini output shape:
+
+```text
+CC1|root=D:\Git\my-app|files=2|lines=42|bytes=2048|seen=10|skipped=8|warnings=0
+F|appsettings.json|config|json|1|120|8|240|m|extension:.json
+{"Logging":{"LogLevel":{"Default":"Information"}}}
+E
+F|src/App.cs|csharp|csharp|40|1928|40|1928|-|extension:.cs
+...
+E
+S|no_plugin_match=8
+```
 
 ## Built-in Plugins
 

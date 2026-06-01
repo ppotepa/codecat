@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using Codecat.Minification;
 using Codecat.Plugins;
 
 namespace Codecat.Scanning;
@@ -11,6 +12,7 @@ internal sealed class ProjectScanner(
     Action<ScanProgress>? progress = null)
 {
     private readonly string _outputPath = Path.GetFullPath(outputPath);
+    private readonly MinifierRegistry _minifiers = MinifierRegistry.CreateDefault();
     private readonly List<CodecatFile> _files = [];
     private readonly List<ScanWarning> _warnings = [];
     private readonly Dictionary<string, int> _skippedByReason = new(StringComparer.OrdinalIgnoreCase);
@@ -109,14 +111,25 @@ internal sealed class ProjectScanner(
                 return false;
             }
 
-            var content = File.ReadAllText(fullPath, Encoding.UTF8);
+            var originalContent = File.ReadAllText(fullPath, Encoding.UTF8);
+            var content = originalContent;
+            var minified = false;
+            if (options.Mini && _minifiers.TryMinify(originalContent, pluginMatch.Language, out var minifiedContent))
+            {
+                content = minifiedContent;
+                minified = true;
+            }
+
             _files.Add(new CodecatFile(
                 RelativePath: relative,
                 Plugin: pluginMatch.PluginName,
                 Language: pluginMatch.Language,
                 Reason: pluginMatch.Reason,
-                Bytes: info.Length,
+                Bytes: Encoding.UTF8.GetByteCount(content),
                 Lines: CountLines(content),
+                OriginalBytes: info.Length,
+                OriginalLines: CountLines(originalContent),
+                Minified: minified,
                 Sha256: ComputeSha256(fullPath),
                 Content: content));
             _filesIncluded++;

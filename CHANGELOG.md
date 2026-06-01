@@ -2,6 +2,15 @@
 
 All notable changes to `codecat` are documented in this file.
 
+## [0.3.0] - 2026-06-01
+
+### Added
+
+- Added `--mini` compact output mode.
+- Added safe content minifier registry.
+- Added built-in minifiers for JSON, XML, CSS, SCSS, Sass, and Less.
+- Added original line/byte counts and minification status to default file metadata.
+
 ## [0.2.1] - 2026-05-31
 
 ### Changed
@@ -47,6 +56,7 @@ All notable changes to `codecat` are documented in this file.
 - Added Windows MSI installer that installs `Codecat.exe` into `Program Files\Codecat` and adds it to `PATH`.
 - Added repository structure under `src/Codecat`, solution file, CI workflow, MIT license, editor config, and release build script.
 
+[0.3.0]: https://github.com/ppotepa/codecat/releases/tag/v0.3.0
 [0.2.1]: https://github.com/ppotepa/codecat/releases/tag/v0.2.1
 [0.2.0]: https://github.com/ppotepa/codecat/releases/tag/v0.2.0
 [0.1.0]: https://github.com/ppotepa/codecat/releases/tag/v0.1.0

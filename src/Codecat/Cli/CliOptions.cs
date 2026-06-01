@@ -9,7 +9,8 @@ internal sealed record CliOptions(
     long MaxFileBytes,
     bool Quiet,
     bool Verbose,
-    bool ListPlugins)
+    bool ListPlugins,
+    bool Mini)
 {
     public const long DefaultMaxFileBytes = 250_000;
 
@@ -21,6 +22,7 @@ internal sealed record CliOptions(
         var quiet = false;
         var verbose = false;
         var listPlugins = false;
+        var mini = false;
 
         for (var i = 0; i < args.Length; i++)
         {
@@ -45,6 +47,12 @@ internal sealed record CliOptions(
             if (arg is "--list-plugins")
             {
                 listPlugins = true;
+                continue;
+            }
+
+            if (arg is "--mini")
+            {
+                mini = true;
                 continue;
             }
 
@@ -77,7 +85,7 @@ internal sealed record CliOptions(
             root = arg;
         }
 
-        return new CliOptions(root, output, maxFileBytes, quiet, verbose, listPlugins);
+        return new CliOptions(root, output, maxFileBytes, quiet, verbose, listPlugins, mini);
     }
 
     public static void PrintUsage()
@@ -91,6 +99,7 @@ internal sealed record CliOptions(
         options:
           -o, --output <path>       Output file. Default: concat.txt
           --max-file-bytes <bytes>  Skip files larger than this. Default: 250000
+          --mini                    Use compact output and safe content minifiers
           --list-plugins           Print built-in plugin rules and exit
           -q, --quiet              Suppress progress output
           -v, --verbose            Print extra skip/progress details

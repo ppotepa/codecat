@@ -47,7 +47,7 @@ if (!options.Quiet)
 
 try
 {
-    var scanOptions = new ScanOptions(options.MaxFileBytes, options.Quiet, options.Verbose);
+    var scanOptions = new ScanOptions(options.MaxFileBytes, options.Quiet, options.Verbose, options.Mini);
     var scanner = new ProjectScanner(
         plugins,
         outputPath,
@@ -56,7 +56,7 @@ try
     var result = scanner.Scan(root);
 
     var writer = new CodecatWriter();
-    writer.Write(root, outputPath, result);
+    writer.Write(root, outputPath, result, options.Mini);
 
     Console.WriteLine($"wrote {result.FilesIncluded} files to {outputPath}");
     if (!options.Quiet)
