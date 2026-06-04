@@ -24,8 +24,11 @@ internal sealed class ProjectScanner(
     public ScanResult Scan(string root)
     {
         var rootFullPath = Path.GetFullPath(root);
+        var gitignoreRules = options.UseGitignore
+            ? LoadGitignoreRules(rootFullPath, rootFullPath, GitignoreRules.Empty)
+            : GitignoreRules.Empty;
 
-        Walk(rootFullPath, rootFullPath);
+        Walk(rootFullPath, rootFullPath, gitignoreRules);
         _files.Sort(static (left, right) => string.Compare(left.RelativePath, right.RelativePath, StringComparison.OrdinalIgnoreCase));
 
         return new ScanResult(
@@ -38,7 +41,7 @@ internal sealed class ProjectScanner(
             _itemsSkipped);
     }
 
-    private void Walk(string root, string currentDirectory)
+    private void Walk(string root, string currentDirectory, GitignoreRules gitignoreRules)
     {
         _directoriesVisited++;
         ReportProgress(ToRelativePath(root, currentDirectory));
@@ -54,6 +57,13 @@ internal sealed class ProjectScanner(
                 continue;
             }
 
+            if (options.UseGitignore && gitignoreRules.IsIgnored(relative, isDirectory: true))
+            {
+                Skip("gitignore");
+                ReportVerbose($"skip dir: {relative} (gitignore)");
+                continue;
+            }
+
             if (plugins.Any(plugin => plugin.ShouldIgnoreDirectory(relative)))
             {
                 Skip("ignored_directory");
@@ -61,7 +71,10 @@ internal sealed class ProjectScanner(
                 continue;
             }
 
-            Walk(root, directory);
+            var childGitignoreRules = options.UseGitignore
+                ? LoadGitignoreRules(root, directory, gitignoreRules)
+                : gitignoreRules;
+            Walk(root, directory, childGitignoreRules);
         }
 
         foreach (var file in SafeEnumerateFiles(root, currentDirectory))
@@ -76,6 +89,13 @@ internal sealed class ProjectScanner(
             {
                 Skip(globalDenyReason);
                 ReportVerbose($"skip file: {relative} ({globalDenyReason})");
+                continue;
+            }
+
+            if (options.UseGitignore && gitignoreRules.IsIgnored(relative, isDirectory: false))
+            {
+                Skip("gitignore");
+                ReportVerbose($"skip file: {relative} (gitignore)");
                 continue;
             }
 
@@ -140,6 +160,26 @@ internal sealed class ProjectScanner(
             Skip("read_error");
             Warn(relative, $"could not read file: {exception.Message}");
             return false;
+        }
+    }
+
+    private GitignoreRules LoadGitignoreRules(string root, string currentDirectory, GitignoreRules rules)
+    {
+        var gitignorePath = Path.Combine(currentDirectory, ".gitignore");
+        if (!File.Exists(gitignorePath))
+        {
+            return rules;
+        }
+
+        try
+        {
+            var baseRelativePath = ToRelativePath(root, currentDirectory);
+            return rules.AddFromFile(gitignorePath, baseRelativePath);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or NotSupportedException or System.Security.SecurityException)
+        {
+            Warn(ToRelativePath(root, gitignorePath), $"could not read .gitignore: {exception.Message}");
+            return rules;
         }
     }
 

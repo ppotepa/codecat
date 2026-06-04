@@ -10,7 +10,9 @@ internal sealed record CliOptions(
     bool Quiet,
     bool Verbose,
     bool ListPlugins,
-    bool Mini)
+    bool Mini,
+    bool All,
+    bool UseGitignore)
 {
     public const long DefaultMaxFileBytes = 250_000;
 
@@ -23,6 +25,8 @@ internal sealed record CliOptions(
         var verbose = false;
         var listPlugins = false;
         var mini = false;
+        var all = false;
+        var useGitignore = false;
 
         for (var i = 0; i < args.Length; i++)
         {
@@ -56,6 +60,18 @@ internal sealed record CliOptions(
                 continue;
             }
 
+            if (arg is "--all")
+            {
+                all = true;
+                continue;
+            }
+
+            if (arg is "--use-gitignore" or "--gitignore")
+            {
+                useGitignore = true;
+                continue;
+            }
+
             if (arg is "--max-file-bytes")
             {
                 if (i + 1 >= args.Length || !long.TryParse(args[++i], out maxFileBytes) || maxFileBytes <= 0)
@@ -85,7 +101,7 @@ internal sealed record CliOptions(
             root = arg;
         }
 
-        return new CliOptions(root, output, maxFileBytes, quiet, verbose, listPlugins, mini);
+        return new CliOptions(root, output, maxFileBytes, quiet, verbose, listPlugins, mini, all, useGitignore);
     }
 
     public static void PrintUsage()
@@ -100,6 +116,8 @@ internal sealed record CliOptions(
           -o, --output <path>       Output file. Default: concat.txt
           --max-file-bytes <bytes>  Skip files larger than this. Default: 250000
           --mini                    Use compact output and safe content minifiers
+          --all                     Include broad optional source/docs files
+          --use-gitignore           Exclude paths matched by .gitignore files
           --list-plugins           Print built-in plugin rules and exit
           -q, --quiet              Suppress progress output
           -v, --verbose            Print extra skip/progress details

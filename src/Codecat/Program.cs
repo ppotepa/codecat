@@ -30,7 +30,7 @@ if (!Directory.Exists(root))
 }
 
 var outputPath = Path.GetFullPath(options.OutputPath);
-var plugins = PluginRegistry.CreateDefault();
+var plugins = PluginRegistry.CreateDefault(options.All);
 
 if (options.ListPlugins)
 {
@@ -43,11 +43,16 @@ if (!options.Quiet)
     Console.Error.WriteLine($"root: {root}");
     Console.Error.WriteLine($"output: {outputPath}");
     Console.Error.WriteLine($"plugins: {plugins.Count}");
+    Console.Error.WriteLine($"mode: {(options.All ? "all" : "default")}");
+    if (options.UseGitignore)
+    {
+        Console.Error.WriteLine("gitignore: enabled");
+    }
 }
 
 try
 {
-    var scanOptions = new ScanOptions(options.MaxFileBytes, options.Quiet, options.Verbose, options.Mini);
+    var scanOptions = new ScanOptions(options.MaxFileBytes, options.Quiet, options.Verbose, options.Mini, options.UseGitignore);
     var scanner = new ProjectScanner(
         plugins,
         outputPath,

@@ -2,6 +2,17 @@
 
 All notable changes to `codecat` are documented in this file.
 
+## [0.31] - 2026-06-04
+
+### Added
+
+- Added `--all` to include broader optional source/docs files such as Markdown.
+- Added `--use-gitignore` / `--gitignore` to exclude paths matched by `.gitignore` files.
+
+### Changed
+
+- Markdown `.md` files are ignored by default unless `--all` is used.
+
 ## [0.3.0] - 2026-06-01
 
 ### Added
@@ -56,6 +67,7 @@ All notable changes to `codecat` are documented in this file.
 - Added Windows MSI installer that installs `Codecat.exe` into `Program Files\Codecat` and adds it to `PATH`.
 - Added repository structure under `src/Codecat`, solution file, CI workflow, MIT license, editor config, and release build script.
 
+[0.31]: https://github.com/ppotepa/codecat/releases/tag/v0.31
 [0.3.0]: https://github.com/ppotepa/codecat/releases/tag/v0.3.0
 [0.2.1]: https://github.com/ppotepa/codecat/releases/tag/v0.2.1
 [0.2.0]: https://github.com/ppotepa/codecat/releases/tag/v0.2.0

@@ -12,7 +12,11 @@ The goal is not to make a pretty human report. The goal is to produce a stable t
 - deterministic ordering
 - no `bin/`, `obj/`, `node_modules/`, `target/`, `.venv/`, `.gradle/`, build caches, or previous `codecat` outputs
 
-Defaults are intentionally restrictive. The scanner uses `global deny -> plugin allowlist match -> safety filters -> include`. Hidden directories are skipped unless explicitly allowed by the scanner, common binary/asset extensions are ignored before plugin matching, and files larger than 250 KB are skipped unless `--max-file-bytes` is increased.
+Defaults are intentionally restrictive. The scanner uses `global deny -> plugin allowlist match -> safety filters -> include`. Hidden directories are skipped unless explicitly allowed by the scanner, Markdown `.md` files are ignored by default, common binary/asset extensions are ignored before plugin matching, and files larger than 250 KB are skipped unless `--max-file-bytes` is increased.
+
+Use `--all` to include broader optional source/docs files such as Markdown `.md` files while keeping global safety and dependency exclusions enabled.
+
+Use `--use-gitignore` when you want `codecat` to also exclude paths matched by `.gitignore` files in the scanned tree. When enabled, `.gitignore` rules run after global denies and before plugin matching.
 
 ## Usage
 
@@ -48,9 +52,9 @@ The script restores the repo-local WiX tool, publishes a Native AOT build, creat
 This creates:
 
 ```text
-artifacts/release/codecat-0.3.0-win-x64/
-artifacts/release/codecat-0.3.0-win-x64.zip
-artifacts/release/codecat-0.3.0-win-x64.msi
+artifacts/release/codecat-0.31-win-x64/
+artifacts/release/codecat-0.31-win-x64.zip
+artifacts/release/codecat-0.31-win-x64.msi
 ```
 
 The MSI installs `Codecat.exe` into `Program Files\Codecat` and adds that folder to the system `PATH`.
@@ -72,6 +76,8 @@ codecat . --quiet                  # suppress progress output
 codecat . --verbose                # print detailed skip information
 codecat . --max-file-bytes 250000  # skip larger files
 codecat . --mini                   # compact output plus safe minification
+codecat . --all                    # include broader optional source/docs files
+codecat . --use-gitignore          # also apply .gitignore exclusions
 codecat --list-plugins             # show built-in plugin rules
 codecat --version
 ```

@@ -2,7 +2,7 @@ namespace Codecat.Plugins;
 
 internal static class PluginRegistry
 {
-    public static IReadOnlyList<ICodecatPlugin> CreateDefault()
+    public static IReadOnlyList<ICodecatPlugin> CreateDefault(bool includeAll = false)
     {
         var ignored = new[]
         {
@@ -400,22 +400,44 @@ internal static class PluginRegistry
 
             new ExtensionPlugin(
                 "docs",
-                new Dictionary<string, string>
-                {
-                    [".md"] = "markdown",
-                    [".mdx"] = "mdx",
-                    [".rst"] = "rst",
-                    [".txt"] = "text",
-                    [".adoc"] = "asciidoc"
-                },
-                new Dictionary<string, string>
-                {
-                    ["README"] = "text",
-                    ["LICENSE"] = "text",
-                    ["CHANGELOG"] = "text",
-                    ["CHANGELOG.md"] = "markdown"
-                },
+                CreateDocsExtensions(includeAll),
+                CreateDocsExactFileNames(includeAll),
                 ignored)
         ];
+    }
+
+    private static Dictionary<string, string> CreateDocsExtensions(bool includeAll)
+    {
+        var extensions = new Dictionary<string, string>
+        {
+            [".mdx"] = "mdx",
+            [".rst"] = "rst",
+            [".txt"] = "text",
+            [".adoc"] = "asciidoc"
+        };
+
+        if (includeAll)
+        {
+            extensions[".md"] = "markdown";
+        }
+
+        return extensions;
+    }
+
+    private static Dictionary<string, string> CreateDocsExactFileNames(bool includeAll)
+    {
+        var exactFileNames = new Dictionary<string, string>
+        {
+            ["README"] = "text",
+            ["LICENSE"] = "text",
+            ["CHANGELOG"] = "text"
+        };
+
+        if (includeAll)
+        {
+            exactFileNames["CHANGELOG.md"] = "markdown";
+        }
+
+        return exactFileNames;
     }
 }
