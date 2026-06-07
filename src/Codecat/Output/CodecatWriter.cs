@@ -1,4 +1,5 @@
 using System.Text;
+using System.IO;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Codecat.Scanning;
@@ -15,20 +16,22 @@ internal sealed class CodecatWriter
             Directory.CreateDirectory(directory);
         }
 
+        var outputBuffer = new StringBuilder();
         using var writer = new StreamWriter(outputPath, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+        using var tee = new TeeTextWriter(writer, outputBuffer);
         if (mini)
         {
-            WriteMini(root, result, writer);
+            WriteMini(root, result, tee);
         }
         else
         {
-            WriteDefault(root, result, writer);
+            WriteDefault(root, result, tee);
         }
 
-        TryCopyToClipboardIfConcat(outputPath);
+        TryCopyToClipboardIfConcat(outputBuffer.ToString(), outputPath);
     }
 
-    private static void TryCopyToClipboardIfConcat(string outputPath)
+    private static void TryCopyToClipboardIfConcat(string output, string outputPath)
     {
         try
         {
@@ -42,7 +45,6 @@ internal sealed class CodecatWriter
                 return;
             }
 
-            var content = File.ReadAllText(outputPath);
             using var process = new Process();
             process.StartInfo = new ProcessStartInfo
             {
@@ -53,7 +55,7 @@ internal sealed class CodecatWriter
                 CreateNoWindow = true
             };
             process.Start();
-            process.StandardInput.Write(content);
+            process.StandardInput.Write(output);
             process.StandardInput.Close();
             process.WaitForExit();
         }
@@ -175,5 +177,32 @@ internal sealed class CodecatWriter
     {
         return value.Replace("\r\n", "\n", StringComparison.Ordinal)
             .Replace("\r", "\n", StringComparison.Ordinal);
+    }
+
+    private sealed class TeeTextWriter(TextWriter primary, StringBuilder buffer) : TextWriter
+    {
+        public override Encoding Encoding => primary.Encoding;
+
+        public override void Write(char value)
+        {
+            primary.Write(value);
+            buffer.Append(value);
+        }
+
+        public override void Write(string? value)
+        {
+            primary.Write(value);
+            buffer.Append(value);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                primary.Dispose();
+            }
+
+            base.Dispose(disposing);
+        }
     }
 }
