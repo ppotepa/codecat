@@ -64,7 +64,7 @@ internal sealed class CodecatWriter
         }
     }
 
-    private static void WriteDefault(string root, ScanResult result, StreamWriter writer)
+    private static void WriteDefault(string root, ScanResult result, TextWriter writer)
     {
         var files = result.Files;
         writer.WriteLine("CODECAT_VERSION: 1");
@@ -111,7 +111,7 @@ internal sealed class CodecatWriter
         writer.WriteLine("<<<END_SUMMARY>>>");
     }
 
-    private static void WriteMini(string root, ScanResult result, StreamWriter writer)
+    private static void WriteMini(string root, ScanResult result, TextWriter writer)
     {
         var files = result.Files;
         writer.WriteLine($"CC1|root={EscapeField(root)}|files={files.Count}|lines={files.Sum(file => file.Lines)}|bytes={files.Sum(file => file.Bytes)}|seen={result.FilesSeen}|skipped={result.ItemsSkipped}|warnings={result.Warnings.Count}");
