@@ -1,4 +1,6 @@
 using System.Text;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Codecat.Scanning;
 
 namespace Codecat.Output;
@@ -17,10 +19,47 @@ internal sealed class CodecatWriter
         if (mini)
         {
             WriteMini(root, result, writer);
-            return;
+        }
+        else
+        {
+            WriteDefault(root, result, writer);
         }
 
-        WriteDefault(root, result, writer);
+        TryCopyToClipboardIfConcat(outputPath);
+    }
+
+    private static void TryCopyToClipboardIfConcat(string outputPath)
+    {
+        try
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            if (!Path.GetFileName(outputPath).Equals("concat.txt", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            var content = File.ReadAllText(outputPath);
+            using var process = new Process();
+            process.StartInfo = new ProcessStartInfo
+            {
+                FileName = "cmd.exe",
+                Arguments = "/c clip",
+                RedirectStandardInput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            process.Start();
+            process.StandardInput.Write(content);
+            process.StandardInput.Close();
+            process.WaitForExit();
+        }
+        catch
+        {
+        }
     }
 
     private static void WriteDefault(string root, ScanResult result, StreamWriter writer)
