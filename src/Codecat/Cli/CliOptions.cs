@@ -12,7 +12,9 @@ internal sealed record CliOptions(
     bool ListPlugins,
     bool Mini,
     bool All,
-    bool UseGitignore)
+    bool UseGitignore,
+    bool CopyToClipboard,
+    bool EnvProbe)
 {
     public const long DefaultMaxFileBytes = 250_000;
 
@@ -27,6 +29,8 @@ internal sealed record CliOptions(
         var mini = false;
         var all = false;
         var useGitignore = false;
+        var copyToClipboard = true;
+        var envProbe = false;
 
         for (var i = 0; i < args.Length; i++)
         {
@@ -72,6 +76,24 @@ internal sealed record CliOptions(
                 continue;
             }
 
+            if (arg is "--copy" or "--clipboard")
+            {
+                copyToClipboard = true;
+                continue;
+            }
+
+            if (arg is "--no-copy" or "--no-clipboard")
+            {
+                copyToClipboard = false;
+                continue;
+            }
+
+            if (arg is "--env-probe" or "--probe-env")
+            {
+                envProbe = true;
+                continue;
+            }
+
             if (arg is "--max-file-bytes")
             {
                 if (i + 1 >= args.Length || !long.TryParse(args[++i], out maxFileBytes) || maxFileBytes <= 0)
@@ -101,7 +123,7 @@ internal sealed record CliOptions(
             root = arg;
         }
 
-        return new CliOptions(root, output, maxFileBytes, quiet, verbose, listPlugins, mini, all, useGitignore);
+        return new CliOptions(root, output, maxFileBytes, quiet, verbose, listPlugins, mini, all, useGitignore, copyToClipboard, envProbe);
     }
 
     public static void PrintUsage()
@@ -118,6 +140,10 @@ internal sealed record CliOptions(
           --mini                    Use compact output and safe content minifiers
           --all                     Include broad optional source/docs files
           --use-gitignore           Exclude paths matched by .gitignore files
+          --copy, --clipboard       Copy the output file to the system clipboard (default)
+          --no-copy, --no-clipboard
+                                    Do not copy the output file to the clipboard
+          --env-probe               Print clipboard environment detection and exit
           --list-plugins           Print built-in plugin rules and exit
           -q, --quiet              Suppress progress output
           -v, --verbose            Print extra skip/progress details
@@ -127,6 +153,8 @@ internal sealed record CliOptions(
         examples:
           codecat .
           codecat . -o context.txt
+          codecat . --no-copy
+          codecat --env-probe
           codecat D:\Git\my-app -o out\concat.txt
         """);
     }

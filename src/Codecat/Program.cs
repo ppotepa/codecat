@@ -22,6 +22,13 @@ if (options is null)
     return 1;
 }
 
+if (options.EnvProbe)
+{
+    var environment = ClipboardEnvironmentProbe.Capture();
+    ClipboardEnvironmentProbe.Print(environment, ClipboardCopier.GetStrategyNames(environment), Console.Out);
+    return 0;
+}
+
 var root = Path.GetFullPath(options.RootPath);
 if (!Directory.Exists(root))
 {
@@ -64,6 +71,19 @@ try
     writer.Write(root, outputPath, result, options.Mini);
 
     Console.WriteLine($"wrote {result.FilesIncluded} files to {outputPath}");
+    if (options.CopyToClipboard)
+    {
+        var copyResult = ClipboardCopier.CopyFile(outputPath);
+        if (!copyResult.Success)
+        {
+            Console.Error.WriteLine($"warning: {copyResult.Message}");
+        }
+        else
+        {
+            Console.WriteLine(copyResult.Message);
+        }
+    }
+
     if (!options.Quiet)
     {
         Console.Error.WriteLine($"done: dirs={result.DirectoriesVisited} seen={result.FilesSeen} included={result.FilesIncluded} skipped={result.ItemsSkipped} warnings={result.Warnings.Count}");

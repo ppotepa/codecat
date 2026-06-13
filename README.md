@@ -67,6 +67,35 @@ codecat --help
 
 Because Windows resolves executables case-insensitively, the installed `Codecat.exe` can be launched as `codecat` from any directory.
 
+Install on Linux for the current user:
+
+```bash
+scripts/install-linux.sh --user
+```
+
+This publishes a Native AOT `linux-x64` build and installs it as `~/.local/bin/codecat`. If that directory is not on `PATH`, the script adds it to your shell profile. Use `--no-modify-profile` to skip that step.
+
+Run the script without arguments to use an interactive install/uninstall menu:
+
+```bash
+scripts/install-linux.sh
+```
+
+Install globally on Linux:
+
+```bash
+scripts/install-linux.sh --global
+```
+
+This installs `codecat` into `/usr/local/bin` and uses `sudo` when needed. Use `--install-dir` to override the target directory or `--runtime` to publish a different Linux runtime identifier.
+
+Uninstall on Linux:
+
+```bash
+scripts/install-linux.sh --uninstall --user
+scripts/install-linux.sh --uninstall --global
+```
+
 Common options:
 
 ```powershell
@@ -78,9 +107,15 @@ codecat . --max-file-bytes 250000  # skip larger files
 codecat . --mini                   # compact output plus safe minification
 codecat . --all                    # include broader optional source/docs files
 codecat . --use-gitignore          # also apply .gitignore exclusions
+codecat . --no-copy                # write output without copying it to the clipboard
+codecat --env-probe                # show OS/terminal detection and copy strategy order
 codecat --list-plugins             # show built-in plugin rules
 codecat --version
 ```
+
+After writing the output file, `codecat` automatically copies it to the system clipboard. Use `--no-copy` to disable this. Clipboard copy first uses tmux/OSC 52 when running in SSH or tmux, so remote sessions can copy into the local terminal clipboard. Local fallback tools are `clip.exe` on Windows, `pbcopy` on macOS, and `wl-copy`, `xclip`, or `xsel` on Linux.
+
+Use `codecat --env-probe` to see the detected OS, Linux distribution, terminal, tmux/SSH state, and clipboard strategy order. For SSH inside tmux, tmux and the local terminal must allow OSC 52 clipboard forwarding.
 
 ## Output Shape
 
@@ -201,6 +236,7 @@ See [CHANGELOG.md](CHANGELOG.md) for release history.
 ```text
 installer/wix/  Windows MSI definition
 scripts/        release/build scripts
+  install-linux.sh  Linux install/uninstall helper for per-user and global installs
 src/Codecat/
   Cli/        command-line parsing
   Output/     concat.txt writer

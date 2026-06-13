@@ -2,6 +2,21 @@
 
 All notable changes to `codecat` are documented in this file.
 
+## [0.33] - 2026-06-13
+
+### Added
+
+- Added a Linux install/uninstall helper with per-user and global modes.
+- Added automatic clipboard copy after writing the output file.
+- Added `--no-copy` / `--no-clipboard` to disable clipboard copy.
+- Added SSH/tmux clipboard support through tmux and OSC 52.
+- Added Linux clipboard support through `wl-copy`, `xclip`, or `xsel`.
+- Added `--env-probe` to print OS, terminal, tmux, SSH, and clipboard strategy detection.
+
+### Changed
+
+- Moved clipboard handling out of the writer into a dedicated output component.
+
 ## [0.31] - 2026-06-04
 
 ### Added
@@ -67,6 +82,7 @@ All notable changes to `codecat` are documented in this file.
 - Added Windows MSI installer that installs `Codecat.exe` into `Program Files\Codecat` and adds it to `PATH`.
 - Added repository structure under `src/Codecat`, solution file, CI workflow, MIT license, editor config, and release build script.
 
+[0.33]: https://github.com/ppotepa/codecat/releases/tag/v0.33
 [0.31]: https://github.com/ppotepa/codecat/releases/tag/v0.31
 [0.3.0]: https://github.com/ppotepa/codecat/releases/tag/v0.3.0
 [0.2.1]: https://github.com/ppotepa/codecat/releases/tag/v0.2.1
