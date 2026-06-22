@@ -1,5 +1,8 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/Codecat/Codecat.csproj" />
+    <Project Path="src/Codecat.Core/Codecat.Core.csproj" />
+    <Project Path="src/Codecat.Infrastructure/Codecat.Infrastructure.csproj" />
+    <Project Path="src/Codecat.Application/Codecat.Application.csproj" />
+    <Project Path="src/Codecat.Cli/Codecat.Cli.csproj" />
   </Folder>
 </Solution>

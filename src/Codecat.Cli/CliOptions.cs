@@ -1,9 +1,10 @@
-using Codecat.Plugins;
 using System.Reflection;
+using Codecat.Plugins;
+using Codecat.Scanning;
 
 namespace Codecat.Cli;
 
-internal sealed record CliOptions(
+public sealed record CliOptions(
     string RootPath,
     string OutputPath,
     long MaxFileBytes,
@@ -19,18 +20,20 @@ internal sealed record CliOptions(
 {
     public const long DefaultMaxFileBytes = 250_000;
 
-    public static CliOptions? Parse(string[] args)
+    public static CliOptions? Parse(string[] args, ScanConfiguration configuration)
     {
         var root = ".";
-        var extensionFilter = (HashSet<string>?)null;
+        var extensionFilter = configuration.DefaultExtensionFilter is null
+            ? null
+            : new HashSet<string>(configuration.DefaultExtensionFilter, StringComparer.OrdinalIgnoreCase);
         var output = "concat.txt";
-        var maxFileBytes = DefaultMaxFileBytes;
-        var quiet = false;
-        var verbose = false;
+        var maxFileBytes = configuration.DefaultMaxFileBytes;
+        var quiet = configuration.DefaultQuiet;
+        var verbose = configuration.DefaultVerbose;
         var listPlugins = false;
         var mini = false;
         var all = false;
-        var useGitignore = false;
+        var useGitignore = configuration.DefaultUseGitignore;
         var copyToClipboard = true;
         var envProbe = false;
 
@@ -39,7 +42,7 @@ internal sealed record CliOptions(
             var arg = args[i];
             if (arg is "-h" or "--help")
             {
-                return null;
+                return null!;
             }
 
             if (arg is "--quiet" or "-q")
@@ -100,13 +103,13 @@ internal sealed record CliOptions(
             {
                 if (i + 1 >= args.Length)
                 {
-                    return null;
+                    return null!;
                 }
 
                 extensionFilter = ParseExtensionFilter(args[++i]);
                 if (extensionFilter is null || extensionFilter.Count == 0)
                 {
-                    return null;
+                    return null!;
                 }
 
                 continue;
@@ -116,7 +119,7 @@ internal sealed record CliOptions(
             {
                 if (i + 1 >= args.Length || !long.TryParse(args[++i], out maxFileBytes) || maxFileBytes <= 0)
                 {
-                    return null;
+                    return null!;
                 }
 
                 continue;
@@ -126,7 +129,7 @@ internal sealed record CliOptions(
             {
                 if (i + 1 >= args.Length)
                 {
-                    return null;
+                    return null!;
                 }
 
                 output = args[++i];
@@ -135,7 +138,7 @@ internal sealed record CliOptions(
 
             if (arg.StartsWith('-'))
             {
-                return null;
+                return null!;
             }
 
             if (arg.StartsWith('['))
@@ -145,16 +148,17 @@ internal sealed record CliOptions(
                 {
                     if (i + 1 >= args.Length)
                     {
-                        return null;
+                        return null!;
                     }
 
                     extensionArg += $" {args[++i]}";
                 }
 
+                extensionFilter ??= [];
                 extensionFilter = ParseExtensionFilter(extensionArg);
                 if (extensionFilter is null || extensionFilter.Count == 0)
                 {
-                    return null;
+                    return null!;
                 }
 
                 continue;
@@ -166,7 +170,7 @@ internal sealed record CliOptions(
                 continue;
             }
 
-            return null;
+            return null!;
         }
 
         return new CliOptions(
@@ -222,7 +226,7 @@ internal sealed record CliOptions(
 
         options:
           -o, --output <path>       Output file. Default: concat.txt
-          --extensions <list>       Limit files to extensions list, e.g. "[cs,csproj]"
+          --extensions <list>        Limit files to extensions list, e.g. "[cs,csproj]"
           --max-file-bytes <bytes>  Skip files larger than this. Default: 250000
           --mini                    Use compact output and safe content minifiers
           --all                     Include broad optional source/docs files
@@ -242,7 +246,7 @@ internal sealed record CliOptions(
           codecat . -o context.txt
           codecat . --no-copy
           codecat --env-probe
-          codecat D:\Git\my-app -o out\concat.txt
+          codecat D:\\Git\\my-app -o out\\concat.txt
           codecat . "[cs,csproj]"
           codecat . --extensions cs,csproj
         """);

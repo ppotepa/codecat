@@ -17,4 +17,17 @@
     <InformationalVersion>0.34</InformationalVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\\Codecat.Core\\Codecat.Core.csproj" />
+    <ProjectReference Include="..\\Codecat.Application\\Codecat.Application.csproj" />
+    <ProjectReference Include="..\\Codecat.Infrastructure\\Codecat.Infrastructure.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

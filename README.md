@@ -16,6 +16,13 @@ Defaults are intentionally restrictive. The scanner uses `global deny -> plugin 
 
 Use `--all` to include broader optional source/docs files such as Markdown `.md` files while keeping global safety and dependency exclusions enabled.
 
+Use `--extensions` (or positional `[ext, ext, ...]`) to include only files with selected extensions. For example:
+
+```powershell
+codecat . --extensions cs,csproj
+codecat . "[cs, csproj]"
+```
+
 Use `--use-gitignore` when you want `codecat` to also exclude paths matched by `.gitignore` files in the scanned tree. When enabled, `.gitignore` rules run after global denies and before plugin matching.
 
 ## Usage
@@ -23,20 +30,20 @@ Use `--use-gitignore` when you want `codecat` to also exclude paths matched by `
 Run from source:
 
 ```powershell
-dotnet run --project src/Codecat -- . -o concat.txt
+dotnet run --project src/Codecat.Cli -- . -o concat.txt
 ```
 
 Scan another project:
 
 ```powershell
-dotnet run --project src/Codecat -- D:\Git\my-app -o D:\Git\my-app\concat.txt
+dotnet run --project src/Codecat.Cli -- D:\Git\my-app -o D:\Git\my-app\concat.txt
 ```
 
 Publish a native Windows executable:
 
 ```powershell
-dotnet publish src/Codecat -c Release -r win-x64
-.\src\Codecat\bin\Release\net10.0\win-x64\publish\Codecat.exe . -o concat.txt
+dotnet publish src/Codecat.Cli -c Release -r win-x64
+.\src\Codecat.Cli\bin\Release\net10.0\win-x64\publish\Codecat.exe . -o concat.txt
 ```
 
 The project is configured for Native AOT, so the published `Codecat.exe` does not require a separate .NET runtime on the target machine.
@@ -52,9 +59,9 @@ The script restores the repo-local WiX tool, publishes a Native AOT build, creat
 This creates:
 
 ```text
-artifacts/release/codecat-0.31-win-x64/
-artifacts/release/codecat-0.31-win-x64.zip
-artifacts/release/codecat-0.31-win-x64.msi
+artifacts/release/codecat-0.34-win-x64/
+artifacts/release/codecat-0.34-win-x64.zip
+artifacts/release/codecat-0.34-win-x64.msi
 ```
 
 The MSI installs `Codecat.exe` into `Program Files\Codecat` and adds that folder to the system `PATH`.
@@ -104,6 +111,7 @@ codecat . -o context.txt           # choose output file
 codecat . --quiet                  # suppress progress output
 codecat . --verbose                # print detailed skip information
 codecat . --max-file-bytes 250000  # skip larger files
+codecat . --extensions cs,csproj   # include only .cs and .csproj files
 codecat . --mini                   # compact output plus safe minification
 codecat . --all                    # include broader optional source/docs files
 codecat . --use-gitignore          # also apply .gitignore exclusions
@@ -181,12 +189,13 @@ S|no_plugin_match=8
 
 ## Built-in Plugins
 
-The first version ships with 30 compiled-in plugins:
+`codecat` ships with 31 compiled-in plugins:
 
 ```text
 csharp
 java
 kotlin
+gradle
 android
 swift
 objective-c
@@ -234,14 +243,16 @@ See [CHANGELOG.md](CHANGELOG.md) for release history.
 ## Repository Layout
 
 ```text
-installer/wix/  Windows MSI definition
-scripts/        release/build scripts
-  install-linux.sh  Linux install/uninstall helper for per-user and global installs
-src/Codecat/
-  Cli/        command-line parsing
-  Output/     concat.txt writer
-  Plugins/    built-in language/ecosystem rules
-  Scanning/   recursive project scanner
+installer/wix/      Windows MSI definition
+scripts/            release/build scripts
+scripts/install-linux.sh
+                    Linux install/uninstall helper for per-user and global installs
+src/Codecat.Core/   domain/contracts + options/models/interfaces
+src/Codecat.Application/
+                    orchestrator + scan command workflow
+src/Codecat.Infrastructure/
+                    plugins, minification, fs helpers, reader
+src/Codecat.Cli/     entrypoint + CLI args + host setup
 ```
 
 ## License

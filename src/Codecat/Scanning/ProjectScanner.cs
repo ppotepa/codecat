@@ -99,6 +99,17 @@ internal sealed class ProjectScanner(
                 continue;
             }
 
+            if (options.ExtensionFilter is not null && options.ExtensionFilter.Count > 0)
+            {
+                var extension = Path.GetExtension(relative);
+                if (!options.ExtensionFilter.Contains(extension))
+                {
+                    Skip("extension_filter");
+                    ReportVerbose($"skip file: {relative} (extension_filter)");
+                    continue;
+                }
+            }
+
             var pluginMatch = plugins
                 .Select(plugin => plugin.TryMatchFile(relative))
                 .FirstOrDefault(match => match is not null);

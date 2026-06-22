@@ -59,7 +59,13 @@ if (!options.Quiet)
 
 try
 {
-    var scanOptions = new ScanOptions(options.MaxFileBytes, options.Quiet, options.Verbose, options.Mini, options.UseGitignore);
+    var scanOptions = new ScanOptions(
+        options.MaxFileBytes,
+        options.Quiet,
+        options.Verbose,
+        options.Mini,
+        options.UseGitignore,
+        options.ExtensionFilter);
     var scanner = new ProjectScanner(
         plugins,
         outputPath,

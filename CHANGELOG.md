@@ -2,6 +2,20 @@
 
 All notable changes to `codecat` are documented in this file.
 
+## [0.34] - 2026-06-22
+
+### Added
+
+- Added support for filtering scanned files by extension via `--extensions`, including bracket syntax `[ext, ext, ...]`.
+- Added a dedicated Gradle plugin for Groovy and Kotlin DSL build files, Gradle wrapper properties, and version catalogs.
+- Expanded Flutter/Dart, Android/NDK, C++/CMake, Rust tooling, PowerShell, Git submodule, HTTP/API, GraphQL, and CodeGraph configuration file detection.
+- Added binary artifact exclusions for Android packages, JVM bytecode, native object/static libraries, and local index databases.
+
+### Changed
+
+- Split the scanner into Core, Application, Infrastructure, and CLI projects.
+- Updated Windows release build automation to publish the new CLI project and upload release assets.
+
 ## [0.33] - 2026-06-13
 
 ### Added
@@ -82,6 +96,7 @@ All notable changes to `codecat` are documented in this file.
 - Added Windows MSI installer that installs `Codecat.exe` into `Program Files\Codecat` and adds it to `PATH`.
 - Added repository structure under `src/Codecat`, solution file, CI workflow, MIT license, editor config, and release build script.
 
+[0.34]: https://github.com/ppotepa/codecat/releases/tag/v0.34
 [0.33]: https://github.com/ppotepa/codecat/releases/tag/v0.33
 [0.31]: https://github.com/ppotepa/codecat/releases/tag/v0.31
 [0.3.0]: https://github.com/ppotepa/codecat/releases/tag/v0.3.0

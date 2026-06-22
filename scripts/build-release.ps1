@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "0.33",
+    [string]$Version = "0.34",
     [string]$Runtime = "win-x64"
 )
 
@@ -9,7 +9,7 @@ if ($PSVersionTable.PSVersion.Major -ge 7) {
 }
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
-$projectPath = Join-Path $repoRoot "src/Codecat/Codecat.csproj"
+$projectPath = Join-Path $repoRoot "src/Codecat.Cli/Codecat.Cli.csproj"
 $releaseRoot = Join-Path $repoRoot "artifacts/release"
 $publishDir = Join-Path $releaseRoot "codecat-$Version-$Runtime"
 $zipPath = Join-Path $releaseRoot "codecat-$Version-$Runtime.zip"

@@ -23,7 +23,7 @@ jobs:
         run: dotnet restore Codecat.slnx
 
       - name: Build
-        run: dotnet build Codecat.slnx --configuration Release --no-restore
+        run: dotnet build src/Codecat.Cli/Codecat.Cli.csproj --configuration Release --no-restore
 
       - name: Publish Native AOT
-        run: dotnet publish src/Codecat/Codecat.csproj --configuration Release --runtime win-x64 --no-restore
+        run: dotnet publish src/Codecat.Cli/Codecat.Cli.csproj --configuration Release --runtime win-x64 --no-restore

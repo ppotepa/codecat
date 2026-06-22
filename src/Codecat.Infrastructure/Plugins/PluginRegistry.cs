@@ -1,8 +1,15 @@
 namespace Codecat.Plugins;
 
-internal static class PluginRegistry
+public sealed class PluginRegistry : IPluginRegistry
 {
-    public static IReadOnlyList<ICodecatPlugin> CreateDefault(bool includeAll = false)
+    private readonly bool _includeAll;
+
+    public PluginRegistry(bool includeAll = false)
+    {
+        _includeAll = includeAll;
+    }
+
+    public IReadOnlyList<ICodecatPlugin> GetPlugins()
     {
         var ignored = new[]
         {
@@ -454,8 +461,8 @@ internal static class PluginRegistry
 
             new ExtensionPlugin(
                 "docs",
-                CreateDocsExtensions(includeAll),
-                CreateDocsExactFileNames(includeAll),
+                CreateDocsExtensions(_includeAll),
+                CreateDocsExactFileNames(_includeAll),
                 ignored)
         ];
     }

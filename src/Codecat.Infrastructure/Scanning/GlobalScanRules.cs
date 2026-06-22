@@ -2,7 +2,7 @@ using System.Text;
 
 namespace Codecat.Scanning;
 
-internal static class GlobalScanRules
+public static class GlobalScanRules
 {
     private static readonly HashSet<string> AllowedHiddenDirectories = new(StringComparer.OrdinalIgnoreCase)
     {
