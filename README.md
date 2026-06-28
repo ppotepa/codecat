@@ -59,9 +59,9 @@ The script restores the repo-local WiX tool, publishes a Native AOT build, creat
 This creates:
 
 ```text
-artifacts/release/codecat-0.35-win-x64/
-artifacts/release/codecat-0.35-win-x64.zip
-artifacts/release/codecat-0.35-win-x64.msi
+artifacts/release/codecat-0.36-win-x64/
+artifacts/release/codecat-0.36-win-x64.zip
+artifacts/release/codecat-0.36-win-x64.msi
 ```
 
 The MSI installs `Codecat.exe` into `Program Files\Codecat` and adds that folder to the system `PATH`.
@@ -113,6 +113,7 @@ codecat . --verbose                # print detailed skip information
 codecat . --max-file-bytes 250000  # skip larger files
 codecat . --extensions cs,csproj   # include only .cs and .csproj files
 codecat . --mini                   # compact output plus safe minification
+codecat . --zip                    # write concat.zip with maximum ZIP compression
 codecat . --all                    # include broader optional source/docs files
 codecat . --use-gitignore          # also apply .gitignore exclusions
 codecat . --no-copy                # write output without copying it to the clipboard
@@ -122,6 +123,8 @@ codecat --version
 ```
 
 After writing the output file, `codecat` automatically copies it to the system clipboard. Use `--no-copy` to disable this. Clipboard copy first uses tmux/OSC 52 when running in SSH or tmux, so remote sessions can copy into the local terminal clipboard. Local fallback tools are `clip.exe` on Windows, `pbcopy` on macOS, and `wl-copy`, `xclip`, or `xsel` on Linux.
+
+Use `--zip` to write the text output into a maximum-compression ZIP archive. With the default output path, `codecat . --zip` writes `concat.zip` containing `concat.txt`; with `-o context.txt --zip`, it writes `context.zip` containing `context.txt`.
 
 Use `codecat --env-probe` to see the detected OS, Linux distribution, terminal, tmux/SSH state, and clipboard strategy order. For SSH inside tmux, tmux and the local terminal must allow OSC 52 clipboard forwarding.
 

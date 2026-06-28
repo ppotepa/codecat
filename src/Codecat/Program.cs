@@ -36,7 +36,13 @@ if (!Directory.Exists(root))
     return 1;
 }
 
-var outputPath = Path.GetFullPath(options.OutputPath);
+var requestedOutputPath = Path.GetFullPath(options.OutputPath);
+var outputPath = options.ZipOutput
+    ? ResolveZipArchivePath(requestedOutputPath)
+    : requestedOutputPath;
+var zipEntryName = options.ZipOutput
+    ? ResolveZipEntryName(requestedOutputPath)
+    : string.Empty;
 var plugins = PluginRegistry.CreateDefault(options.All);
 
 if (options.ListPlugins)
@@ -55,10 +61,16 @@ if (!options.Quiet)
     {
         Console.Error.WriteLine("gitignore: enabled");
     }
+
+    if (options.ZipOutput)
+    {
+        Console.Error.WriteLine($"zip: enabled ({zipEntryName})");
+    }
 }
 
 try
 {
+    string? tempOutputPath = null;
     var scanOptions = new ScanOptions(
         options.MaxFileBytes,
         options.Quiet,
@@ -74,7 +86,26 @@ try
     var result = scanner.Scan(root);
 
     var writer = new CodecatWriter();
-    writer.Write(root, outputPath, result, options.Mini);
+    try
+    {
+        var textOutputPath = outputPath;
+        if (options.ZipOutput)
+        {
+            tempOutputPath = Path.Combine(Path.GetTempPath(), $"codecat-{Guid.NewGuid():N}-{zipEntryName}");
+            textOutputPath = tempOutputPath;
+        }
+
+        writer.Write(root, textOutputPath, result, options.Mini);
+
+        if (options.ZipOutput)
+        {
+            ZipArchiveWriter.WriteSingleFileArchive(textOutputPath, outputPath, zipEntryName);
+        }
+    }
+    finally
+    {
+        TryDeleteTempOutput(tempOutputPath);
+    }
 
     Console.WriteLine($"wrote {result.FilesIncluded} files to {outputPath}");
     if (options.CopyToClipboard)
@@ -101,4 +132,40 @@ catch (Exception exception) when (exception is IOException or UnauthorizedAccess
 {
     Console.Error.WriteLine($"error: {exception.Message}");
     return 1;
+}
+
+static string ResolveZipArchivePath(string requestedOutputPath)
+{
+    return string.Equals(Path.GetExtension(requestedOutputPath), ".zip", StringComparison.OrdinalIgnoreCase)
+        ? requestedOutputPath
+        : Path.ChangeExtension(requestedOutputPath, ".zip");
+}
+
+static string ResolveZipEntryName(string requestedOutputPath)
+{
+    var fileName = Path.GetFileName(requestedOutputPath);
+    if (string.IsNullOrWhiteSpace(fileName))
+    {
+        return "concat.txt";
+    }
+
+    return string.Equals(Path.GetExtension(fileName), ".zip", StringComparison.OrdinalIgnoreCase)
+        ? Path.ChangeExtension(fileName, ".txt")
+        : fileName;
+}
+
+static void TryDeleteTempOutput(string? tempOutputPath)
+{
+    if (string.IsNullOrWhiteSpace(tempOutputPath))
+    {
+        return;
+    }
+
+    try
+    {
+        File.Delete(tempOutputPath);
+    }
+    catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or NotSupportedException)
+    {
+    }
 }

@@ -2,6 +2,12 @@
 
 All notable changes to `codecat` are documented in this file.
 
+## [0.36] - 2026-06-28
+
+### Added
+
+- Added `--zip` to write the generated text output into a maximum-compression ZIP archive.
+
 ## [0.35] - 2026-06-28
 
 ### Added
@@ -104,6 +110,7 @@ All notable changes to `codecat` are documented in this file.
 - Added Windows MSI installer that installs `Codecat.exe` into `Program Files\Codecat` and adds it to `PATH`.
 - Added repository structure under `src/Codecat`, solution file, CI workflow, MIT license, editor config, and release build script.
 
+[0.36]: https://github.com/ppotepa/codecat/releases/tag/v0.36
 [0.35]: https://github.com/ppotepa/codecat/releases/tag/v0.35
 [0.34]: https://github.com/ppotepa/codecat/releases/tag/v0.34
 [0.33]: https://github.com/ppotepa/codecat/releases/tag/v0.33

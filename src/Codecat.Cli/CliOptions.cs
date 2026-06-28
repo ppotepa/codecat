@@ -15,6 +15,7 @@ public sealed record CliOptions(
     bool Mini,
     bool All,
     bool UseGitignore,
+    bool ZipOutput,
     bool CopyToClipboard,
     bool EnvProbe)
 {
@@ -34,6 +35,7 @@ public sealed record CliOptions(
         var mini = false;
         var all = false;
         var useGitignore = configuration.DefaultUseGitignore;
+        var zipOutput = false;
         var copyToClipboard = true;
         var envProbe = false;
 
@@ -78,6 +80,12 @@ public sealed record CliOptions(
             if (arg is "--use-gitignore" or "--gitignore")
             {
                 useGitignore = true;
+                continue;
+            }
+
+            if (arg is "--zip")
+            {
+                zipOutput = true;
                 continue;
             }
 
@@ -184,6 +192,7 @@ public sealed record CliOptions(
             mini,
             all,
             useGitignore,
+            zipOutput,
             copyToClipboard,
             envProbe);
     }
@@ -231,6 +240,7 @@ public sealed record CliOptions(
           --mini                    Use compact output and safe content minifiers
           --all                     Include broad optional source/docs files
           --use-gitignore           Exclude paths matched by .gitignore files
+          --zip                     Write a maximum-compression ZIP archive
           --copy, --clipboard       Copy the output file to the system clipboard (default)
           --no-copy, --no-clipboard
                                     Do not copy the output file to the clipboard
@@ -244,6 +254,7 @@ public sealed record CliOptions(
         examples:
           codecat .
           codecat . -o context.txt
+          codecat . --zip
           codecat . --no-copy
           codecat --env-probe
           codecat D:\\Git\\my-app -o out\\concat.txt
