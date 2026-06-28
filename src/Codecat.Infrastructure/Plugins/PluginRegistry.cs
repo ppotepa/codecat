@@ -248,6 +248,22 @@ public sealed class PluginRegistry : IPluginRegistry
                 ignoredDirectories: ignored),
 
             new ExtensionPlugin(
+                "shader",
+                new Dictionary<string, string>
+                {
+                    [".wgsl"] = "wgsl"
+                },
+                ignoredDirectories: ignored),
+
+            new ExtensionPlugin(
+                "script",
+                new Dictionary<string, string>
+                {
+                    [".rhai"] = "rhai"
+                },
+                ignoredDirectories: ignored),
+
+            new ExtensionPlugin(
                 "php",
                 new Dictionary<string, string> { [".php"] = "php", [".phtml"] = "php" },
                 new Dictionary<string, string>
@@ -435,7 +451,6 @@ public sealed class PluginRegistry : IPluginRegistry
                     [".json"] = "json",
                     [".yaml"] = "yaml",
                     [".yml"] = "yaml",
-                    [".toml"] = "toml",
                     [".ini"] = "ini",
                     [".conf"] = "conf",
                     [".config"] = "xml",
@@ -458,6 +473,14 @@ public sealed class PluginRegistry : IPluginRegistry
                     ["codegraph.toml"] = "toml"
                 },
                 ignored),
+
+            new ExtensionPlugin(
+                "toml",
+                new Dictionary<string, string>
+                {
+                    [".toml"] = "toml"
+                },
+                ignoredDirectories: ignored),
 
             new ExtensionPlugin(
                 "docs",

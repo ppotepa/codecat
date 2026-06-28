@@ -59,9 +59,9 @@ The script restores the repo-local WiX tool, publishes a Native AOT build, creat
 This creates:
 
 ```text
-artifacts/release/codecat-0.34-win-x64/
-artifacts/release/codecat-0.34-win-x64.zip
-artifacts/release/codecat-0.34-win-x64.msi
+artifacts/release/codecat-0.35-win-x64/
+artifacts/release/codecat-0.35-win-x64.zip
+artifacts/release/codecat-0.35-win-x64.msi
 ```
 
 The MSI installs `Codecat.exe` into `Program Files\Codecat` and adds that folder to the system `PATH`.
@@ -189,7 +189,7 @@ S|no_plugin_match=8
 
 ## Built-in Plugins
 
-`codecat` ships with 31 compiled-in plugins:
+`codecat` ships with 34 compiled-in plugins:
 
 ```text
 csharp
@@ -207,6 +207,8 @@ python
 javascript
 typescript
 web
+shader
+script
 php
 ruby
 dart-flutter
@@ -222,6 +224,7 @@ powershell
 shell
 sql
 config
+toml
 docs
 ```
 

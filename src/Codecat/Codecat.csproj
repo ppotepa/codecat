@@ -13,8 +13,8 @@
     <Description>Concatenate source files into an LLM-friendly text container.</Description>
     <RepositoryUrl>https://github.com/ppotepa/codecat</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>0.34</Version>
-    <InformationalVersion>0.34</InformationalVersion>
+    <Version>0.35</Version>
+    <InformationalVersion>0.35</InformationalVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 </Project>

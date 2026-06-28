@@ -2,6 +2,14 @@
 
 All notable changes to `codecat` are documented in this file.
 
+## [0.35] - 2026-06-28
+
+### Added
+
+- Added WGSL shader file detection through a dedicated `shader` plugin.
+- Added Rhai script file detection through a dedicated `script` plugin.
+- Added generic TOML file detection through a dedicated `toml` plugin.
+
 ## [0.34] - 2026-06-22
 
 ### Added
@@ -96,6 +104,7 @@ All notable changes to `codecat` are documented in this file.
 - Added Windows MSI installer that installs `Codecat.exe` into `Program Files\Codecat` and adds it to `PATH`.
 - Added repository structure under `src/Codecat`, solution file, CI workflow, MIT license, editor config, and release build script.
 
+[0.35]: https://github.com/ppotepa/codecat/releases/tag/v0.35
 [0.34]: https://github.com/ppotepa/codecat/releases/tag/v0.34
 [0.33]: https://github.com/ppotepa/codecat/releases/tag/v0.33
 [0.31]: https://github.com/ppotepa/codecat/releases/tag/v0.31
