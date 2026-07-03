@@ -2,6 +2,12 @@
 
 All notable changes to `codecat` are documented in this file.
 
+## [0.37] - 2026-07-03
+
+### Fixed
+
+- Fixed the Linux installer to publish the current `Codecat.Cli` project.
+
 ## [0.36] - 2026-06-28
 
 ### Added
@@ -110,6 +116,7 @@ All notable changes to `codecat` are documented in this file.
 - Added Windows MSI installer that installs `Codecat.exe` into `Program Files\Codecat` and adds it to `PATH`.
 - Added repository structure under `src/Codecat`, solution file, CI workflow, MIT license, editor config, and release build script.
 
+[0.37]: https://github.com/ppotepa/codecat/releases/tag/v0.37
 [0.36]: https://github.com/ppotepa/codecat/releases/tag/v0.36
 [0.35]: https://github.com/ppotepa/codecat/releases/tag/v0.35
 [0.34]: https://github.com/ppotepa/codecat/releases/tag/v0.34

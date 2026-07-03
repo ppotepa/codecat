@@ -266,7 +266,7 @@ uninstall_codecat() {
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd -- "$script_dir/.." && pwd)"
-project_path="$repo_root/src/Codecat/Codecat.csproj"
+project_path="$repo_root/src/Codecat.Cli/Codecat.Cli.csproj"
 
 mode="user"
 install_dir=""
