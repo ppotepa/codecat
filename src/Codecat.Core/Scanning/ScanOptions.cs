@@ -6,4 +6,5 @@ public sealed record ScanOptions(
     bool Verbose,
     bool Mini,
     bool UseGitignore,
-    IReadOnlyCollection<string>? ExtensionFilter);
+    IReadOnlyCollection<string>? ExtensionFilter,
+    bool LinesOnly = false);

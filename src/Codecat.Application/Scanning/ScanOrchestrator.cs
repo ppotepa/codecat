@@ -7,6 +7,7 @@ namespace Codecat.Scanning;
 public sealed class ScanOrchestrator(
     IPluginRegistry pluginRegistry,
     IFileReader fileReader,
+    IFileLineCounter lineCounter,
     IMinifierRegistry minifiers,
     IMetricsCalculator metricsCalculator,
     IErrorHandler<ScanError> errorHandler,
@@ -16,6 +17,7 @@ public sealed class ScanOrchestrator(
     private readonly Dictionary<string, int> _skippedByReason = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<ScanWarning> _warnings = [];
     private readonly List<CodecatFile> _files = [];
+    private readonly List<FileLineCount> _lineCounts = [];
     private int _directoriesVisited;
     private int _filesSeen;
     private int _filesIncluded;
@@ -23,13 +25,13 @@ public sealed class ScanOrchestrator(
 
     public async Task<ScanResult> ScanAsync(
         string root,
-        string outputPath,
+        string? outputPath,
         ScanOptions options,
         Action<ScanProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
         var rootFullPath = Path.GetFullPath(root);
-        outputPath = Path.GetFullPath(outputPath);
+        outputPath = outputPath is null ? null : Path.GetFullPath(outputPath);
         var gitignoreRules = options.UseGitignore
             ? LoadGitignoreRules(rootFullPath, rootFullPath, GitignoreRules.Empty)
             : GitignoreRules.Empty;
@@ -37,6 +39,7 @@ public sealed class ScanOrchestrator(
         await WalkAsync(rootFullPath, rootFullPath, gitignoreRules, options, progress, outputPath, cancellationToken);
 
         _files.Sort(static (left, right) => string.Compare(left.RelativePath, right.RelativePath, StringComparison.OrdinalIgnoreCase));
+        _lineCounts.Sort(static (left, right) => string.Compare(left.RelativePath, right.RelativePath, StringComparison.OrdinalIgnoreCase));
         return new ScanResult(
             _files.ToArray(),
             _warnings.ToArray(),
@@ -44,7 +47,8 @@ public sealed class ScanOrchestrator(
             _directoriesVisited,
             _filesSeen,
             _filesIncluded,
-            _itemsSkipped);
+            _itemsSkipped,
+            _lineCounts.ToArray());
     }
 
     private async Task WalkAsync(
@@ -53,7 +57,7 @@ public sealed class ScanOrchestrator(
         GitignoreRules gitignoreRules,
         ScanOptions options,
         Action<ScanProgress>? progress,
-        string outputPath,
+        string? outputPath,
         CancellationToken cancellationToken)
     {
         _directoriesVisited++;
@@ -153,6 +157,22 @@ public sealed class ScanOrchestrator(
         {
             Skip(safetyDenyReason);
             ReportVerbose($"skip file: {relative} ({safetyDenyReason})", options);
+            return;
+        }
+
+        if (options.LinesOnly)
+        {
+            try
+            {
+                _lineCounts.Add(new FileLineCount(relative, await lineCounter.CountAsync(fullPath, cancellationToken)));
+                _filesIncluded++;
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException or System.Security.SecurityException)
+            {
+                Skip("read_error");
+                _warnings.Add(new ScanWarning(relative, ex.Message));
+                errorHandler.Handle(new ScanError(ScanErrorKind.ReadFile, relative, ex.Message), relative);
+            }
             return;
         }
 

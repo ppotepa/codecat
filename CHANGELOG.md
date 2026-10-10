@@ -2,6 +2,19 @@
 
 All notable changes to `codecat` are documented in this file.
 
+## [0.38] - 2026-10-11
+
+### Added
+
+- Added Rust `.ron` and Fluent `.ftl` file detection.
+- Added `--docs` to include Markdown `.md` files without enabling every optional plugin file.
+- Added `--lines` reports with per-extension totals and optional folder trees, without reading files into memory.
+
+### Changed
+
+- `--lines` scans all plugin-recognized files and has no default file size limit.
+- Updated the active CLI projects to target .NET 9.
+
 ## [0.37] - 2026-07-03
 
 ### Fixed
@@ -117,6 +130,7 @@ All notable changes to `codecat` are documented in this file.
 - Added repository structure under `src/Codecat`, solution file, CI workflow, MIT license, editor config, and release build script.
 
 [0.37]: https://github.com/ppotepa/codecat/releases/tag/v0.37
+[0.38]: https://github.com/ppotepa/codecat/releases/tag/v0.38
 [0.36]: https://github.com/ppotepa/codecat/releases/tag/v0.36
 [0.35]: https://github.com/ppotepa/codecat/releases/tag/v0.35
 [0.34]: https://github.com/ppotepa/codecat/releases/tag/v0.34

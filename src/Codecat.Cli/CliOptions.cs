@@ -17,7 +17,12 @@ public sealed record CliOptions(
     bool UseGitignore,
     bool ZipOutput,
     bool CopyToClipboard,
-    bool EnvProbe)
+    bool EnvProbe,
+    bool Docs,
+    bool Lines,
+    bool Tree,
+    int? Depth,
+    bool MaxFileBytesExplicit)
 {
     public const long DefaultMaxFileBytes = 250_000;
 
@@ -38,6 +43,13 @@ public sealed record CliOptions(
         var zipOutput = false;
         var copyToClipboard = true;
         var envProbe = false;
+        var docs = false;
+        var lines = false;
+        var tree = false;
+        int? depth = null;
+        var maxFileBytesExplicit = false;
+        var outputOptionUsed = false;
+        var copyOptionUsed = false;
 
         for (var i = 0; i < args.Length; i++)
         {
@@ -77,6 +89,16 @@ public sealed record CliOptions(
                 continue;
             }
 
+            if (arg is "--docs") { docs = true; continue; }
+            if (arg is "--lines") { lines = true; continue; }
+            if (arg is "--tree" or "-tree") { tree = true; continue; }
+            if (arg is "--depth")
+            {
+                if (i + 1 >= args.Length || !int.TryParse(args[++i], out var parsedDepth) || parsedDepth < 0) return null!;
+                depth = parsedDepth;
+                continue;
+            }
+
             if (arg is "--use-gitignore" or "--gitignore")
             {
                 useGitignore = true;
@@ -91,12 +113,14 @@ public sealed record CliOptions(
 
             if (arg is "--copy" or "--clipboard")
             {
+                copyOptionUsed = true;
                 copyToClipboard = true;
                 continue;
             }
 
             if (arg is "--no-copy" or "--no-clipboard")
             {
+                copyOptionUsed = true;
                 copyToClipboard = false;
                 continue;
             }
@@ -130,11 +154,14 @@ public sealed record CliOptions(
                     return null!;
                 }
 
+                maxFileBytesExplicit = true;
+
                 continue;
             }
 
             if (arg is "-o" or "--output")
             {
+                outputOptionUsed = true;
                 if (i + 1 >= args.Length)
                 {
                     return null!;
@@ -181,6 +208,9 @@ public sealed record CliOptions(
             return null!;
         }
 
+        if ((tree && !lines) || (depth is not null && !tree) ||
+            (lines && (outputOptionUsed || zipOutput || mini || copyOptionUsed))) return null!;
+
         return new CliOptions(
             root,
             output,
@@ -194,7 +224,12 @@ public sealed record CliOptions(
             useGitignore,
             zipOutput,
             copyToClipboard,
-            envProbe);
+            envProbe,
+            docs,
+            lines,
+            tree,
+            depth,
+            maxFileBytesExplicit);
     }
 
     private static HashSet<string>? ParseExtensionFilter(string input)
@@ -239,6 +274,10 @@ public sealed record CliOptions(
           --max-file-bytes <bytes>  Skip files larger than this. Default: 250000
           --mini                    Use compact output and safe content minifiers
           --all                     Include broad optional source/docs files
+          --docs                    Include Markdown .md files (also enabled by --all)
+          --lines                   Print physical line counts for all recognized plugins to stdout
+          --tree, -tree             Add folder totals to --lines
+          --depth <N>               Show folders through depth N (root is 0); requires --tree
           --use-gitignore           Exclude paths matched by .gitignore files
           --zip                     Write a maximum-compression ZIP archive
           --copy, --clipboard       Copy the output file to the system clipboard (default)
@@ -260,6 +299,12 @@ public sealed record CliOptions(
           codecat D:\\Git\\my-app -o out\\concat.txt
           codecat . "[cs,csproj]"
           codecat . --extensions cs,csproj
+          codecat . --lines
+          codecat . --lines --tree --depth 2 --docs
+
+        Recognized source includes .rs, .wgsl, .ron, .toml and .ftl. Markdown .md
+        requires --docs or --all. --lines counts blank lines and comments, has no
+        default size limit, and ends with TOTAL: <files> files, <lines> lines.
         """);
     }
 

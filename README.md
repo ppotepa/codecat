@@ -16,6 +16,15 @@ Defaults are intentionally restrictive. The scanner uses `global deny -> plugin 
 
 Use `--all` to include broader optional source/docs files such as Markdown `.md` files while keeping global safety and dependency exclusions enabled.
 
+The built-in plugins recognize Rust `.rs` and `.ron`, WGSL `.wgsl`, TOML `.toml`, and Fluent `.ftl` files. Markdown `.md` stays excluded by default; `--docs` or `--all` includes it. An extension filter such as `--extensions md` only narrows already enabled plugin matches.
+
+Use `--lines` to print physical line counts for files recognized by **all built-in plugins**. Blank lines and comments count. The report groups files by lowercase extension (`[no extension]` for extensionless files), then ends with `TOTAL: <files> files, <lines> lines`. `--tree` adds folder totals including descendants; `--depth 0` shows only the root, and `--depth 1` also shows its direct children. The root is `.`. This mode writes to stdout without creating an output file or copying to the clipboard. It has no default file size limit; pass `--max-file-bytes N` to set one. Directory and binary exclusions, `--extensions`, and optional `--use-gitignore` still apply.
+
+```bash
+codecat . --lines
+codecat . --lines --tree --depth 2 --docs
+```
+
 Use `--extensions` (or positional `[ext, ext, ...]`) to include only files with selected extensions. For example:
 
 ```powershell
@@ -43,7 +52,7 @@ Publish a native Windows executable:
 
 ```powershell
 dotnet publish src/Codecat.Cli -c Release -r win-x64
-.\src\Codecat.Cli\bin\Release\net10.0\win-x64\publish\Codecat.exe . -o concat.txt
+.\src\Codecat.Cli\bin\Release\net9.0\win-x64\publish\Codecat.exe . -o concat.txt
 ```
 
 The project is configured for Native AOT, so the published `Codecat.exe` does not require a separate .NET runtime on the target machine.
@@ -59,9 +68,9 @@ The script restores the repo-local WiX tool, publishes a Native AOT build, creat
 This creates:
 
 ```text
-artifacts/release/codecat-0.37-win-x64/
-artifacts/release/codecat-0.37-win-x64.zip
-artifacts/release/codecat-0.37-win-x64.msi
+artifacts/release/codecat-0.38-win-x64/
+artifacts/release/codecat-0.38-win-x64.zip
+artifacts/release/codecat-0.38-win-x64.msi
 ```
 
 The MSI installs `Codecat.exe` into `Program Files\Codecat` and adds that folder to the system `PATH`.

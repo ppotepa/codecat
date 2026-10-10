@@ -26,14 +26,14 @@ public static class GlobalScanRules
             : null;
     }
 
-    public static string? TryDenyFileBeforePluginMatch(string fullPath, string relativePath, string outputPath)
+    public static string? TryDenyFileBeforePluginMatch(string fullPath, string relativePath, string? outputPath)
     {
         if (IgnoredFileExtensions.Contains(Path.GetExtension(relativePath)))
         {
             return "ignored_extension";
         }
 
-        if (string.Equals(Path.GetFullPath(fullPath), outputPath, StringComparison.OrdinalIgnoreCase))
+        if (outputPath is not null && string.Equals(Path.GetFullPath(fullPath), outputPath, StringComparison.OrdinalIgnoreCase))
         {
             return "output_file";
         }

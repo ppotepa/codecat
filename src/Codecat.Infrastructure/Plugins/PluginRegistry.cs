@@ -3,10 +3,12 @@ namespace Codecat.Plugins;
 public sealed class PluginRegistry : IPluginRegistry
 {
     private readonly bool _includeAll;
+    private readonly bool _includeDocs;
 
-    public PluginRegistry(bool includeAll = false)
+    public PluginRegistry(bool includeAll = false, bool includeDocs = false)
     {
         _includeAll = includeAll;
+        _includeDocs = includeDocs;
     }
 
     public IReadOnlyList<ICodecatPlugin> GetPlugins()
@@ -152,7 +154,7 @@ public sealed class PluginRegistry : IPluginRegistry
 
             new ExtensionPlugin(
                 "rust",
-                new Dictionary<string, string> { [".rs"] = "rust" },
+                new Dictionary<string, string> { [".rs"] = "rust", [".ron"] = "ron" },
                 new Dictionary<string, string>
                 {
                     ["Cargo.toml"] = "toml",
@@ -449,6 +451,7 @@ public sealed class PluginRegistry : IPluginRegistry
                 new Dictionary<string, string>
                 {
                     [".json"] = "json",
+                    [".ftl"] = "fluent",
                     [".yaml"] = "yaml",
                     [".yml"] = "yaml",
                     [".ini"] = "ini",
@@ -484,8 +487,8 @@ public sealed class PluginRegistry : IPluginRegistry
 
             new ExtensionPlugin(
                 "docs",
-                CreateDocsExtensions(_includeAll),
-                CreateDocsExactFileNames(_includeAll),
+                CreateDocsExtensions(_includeAll || _includeDocs),
+                CreateDocsExactFileNames(_includeAll || _includeDocs),
                 ignored)
         ];
     }

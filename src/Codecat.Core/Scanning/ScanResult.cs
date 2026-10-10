@@ -7,4 +7,5 @@ public sealed record ScanResult(
     int DirectoriesVisited,
     int FilesSeen,
     int FilesIncluded,
-    int ItemsSkipped);
+    int ItemsSkipped,
+    IReadOnlyList<FileLineCount> LineCounts);

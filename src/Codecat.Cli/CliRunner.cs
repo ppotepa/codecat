@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace Codecat.Cli;
 
 public sealed class CliRunner(
-    Func<bool, IScanOrchestrator> orchestratorFactory,
+    Func<bool, bool, IScanOrchestrator> orchestratorFactory,
     IScanResultWriter writer,
     IOptions<ScanConfiguration> configuration,
     ILogger<CliRunner> logger)
@@ -42,7 +42,7 @@ public sealed class CliRunner(
 
         var defaults = configuration.Value;
         var includeAllPlugins = defaults.DefaultAllPlugins || options.All;
-        var plugins = new PluginRegistry(includeAllPlugins).GetPlugins();
+        var plugins = new PluginRegistry(includeAllPlugins, options.Docs).GetPlugins();
         if (options.ListPlugins)
         {
             CliOptions.PrintPlugins(plugins);
@@ -56,18 +56,18 @@ public sealed class CliRunner(
             return 1;
         }
 
-        var requestedOutputPath = Path.GetFullPath(options.OutputPath);
+        var requestedOutputPath = options.Lines ? null : Path.GetFullPath(options.OutputPath);
         var outputPath = options.ZipOutput
-            ? ResolveZipArchivePath(requestedOutputPath)
+            ? ResolveZipArchivePath(requestedOutputPath!)
             : requestedOutputPath;
         var zipEntryName = options.ZipOutput
-            ? ResolveZipEntryName(requestedOutputPath)
+            ? ResolveZipEntryName(requestedOutputPath!)
             : string.Empty;
 
         if (!options.Quiet)
         {
             Console.Error.WriteLine($"root: {root}");
-            Console.Error.WriteLine($"output: {outputPath}");
+            if (!options.Lines) Console.Error.WriteLine($"output: {outputPath}");
             Console.Error.WriteLine($"plugins: {plugins.Count}");
             Console.Error.WriteLine($"mode: {(options.All ? "all" : "default")}");
             if (options.UseGitignore)
@@ -85,18 +85,25 @@ public sealed class CliRunner(
         {
             string? tempOutputPath = null;
             var scanOptions = new ScanOptions(
-                options.MaxFileBytes,
+                options.Lines && !options.MaxFileBytesExplicit ? long.MaxValue : options.MaxFileBytes,
                 options.Quiet,
                 options.Verbose,
                 options.Mini,
                 options.UseGitignore,
-                options.ExtensionFilter);
+                options.ExtensionFilter,
+                options.Lines);
 
-            var orchestrator = orchestratorFactory(options.All);
+            var orchestrator = orchestratorFactory(options.All, options.Docs);
             var result = await orchestrator.ScanAsync(root, outputPath, scanOptions, progress =>
             {
                 logger.LogInformation("scanning: dirs={Directories} seen={Seen} included={Included} skipped={Skipped} current={Current}", progress.DirectoriesVisited, progress.FilesSeen, progress.FilesIncluded, progress.ItemsSkipped, progress.CurrentPath);
             }, cancellationToken);
+
+            if (options.Lines)
+            {
+                LineReportWriter.Write(Console.Out, result.LineCounts, options.Tree, options.Depth);
+                return 0;
+            }
 
             try
             {
@@ -107,11 +114,11 @@ public sealed class CliRunner(
                     textOutputPath = tempOutputPath;
                 }
 
-                writer.Write(root, textOutputPath, result, options.Mini);
+                writer.Write(root, textOutputPath!, result, options.Mini);
 
                 if (options.ZipOutput)
                 {
-                    ZipArchiveWriter.WriteSingleFileArchive(textOutputPath, outputPath, zipEntryName);
+                    ZipArchiveWriter.WriteSingleFileArchive(textOutputPath!, outputPath!, zipEntryName);
                 }
             }
             finally
@@ -122,7 +129,7 @@ public sealed class CliRunner(
             Console.WriteLine($"wrote {result.FilesIncluded} files to {outputPath}");
             if (options.CopyToClipboard)
             {
-                var copyResult = ClipboardCopier.CopyFile(outputPath);
+                var copyResult = ClipboardCopier.CopyFile(outputPath!);
                 if (!copyResult.Success)
                 {
                     Console.Error.WriteLine($"warning: {copyResult.Message}");

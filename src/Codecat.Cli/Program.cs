@@ -13,14 +13,15 @@ var hostBuilder = Host.CreateApplicationBuilder(args);
 hostBuilder.Services.AddOptions<ScanConfiguration>()
     .Bind(hostBuilder.Configuration.GetSection("scan"));
 
-hostBuilder.Services.AddTransient<Func<bool, IScanOrchestrator>>(sp =>
+hostBuilder.Services.AddTransient<Func<bool, bool, IScanOrchestrator>>(sp =>
 {
     var defaultIncludeAll = sp.GetRequiredService<IOptions<ScanConfiguration>>().Value.DefaultAllPlugins;
-    return includeAll =>
+    return (includeAll, includeDocs) =>
     {
         return new ScanOrchestrator(
-            new PluginRegistry(defaultIncludeAll || includeAll),
+            new PluginRegistry(defaultIncludeAll || includeAll, includeDocs),
             sp.GetRequiredService<IFileReader>(),
+            sp.GetRequiredService<IFileLineCounter>(),
             sp.GetRequiredService<IMinifierRegistry>(),
             sp.GetRequiredService<IMetricsCalculator>(),
             sp.GetRequiredService<IErrorHandler<ScanError>>(),
@@ -29,6 +30,7 @@ hostBuilder.Services.AddTransient<Func<bool, IScanOrchestrator>>(sp =>
 });
 
 hostBuilder.Services.AddSingleton<IFileReader, FileReader>();
+hostBuilder.Services.AddSingleton<IFileLineCounter, FileLineCounter>();
 hostBuilder.Services.AddSingleton<IMinifierRegistry, MinifierRegistry>();
 hostBuilder.Services.AddSingleton<IMetricsCalculator, MetricsCalculator>();
 hostBuilder.Services.AddSingleton<IScanResultWriter, CodecatWriter>();
