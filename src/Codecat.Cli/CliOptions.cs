@@ -16,6 +16,7 @@ public sealed record CliOptions(
     bool All,
     bool UseGitignore,
     bool ZipOutput,
+    bool XzOutput,
     bool CopyToClipboard,
     bool EnvProbe,
     bool Docs,
@@ -41,6 +42,7 @@ public sealed record CliOptions(
         var all = false;
         var useGitignore = configuration.DefaultUseGitignore;
         var zipOutput = false;
+        var xzOutput = false;
         var copyToClipboard = true;
         var envProbe = false;
         var docs = false;
@@ -108,6 +110,12 @@ public sealed record CliOptions(
             if (arg is "--zip")
             {
                 zipOutput = true;
+                continue;
+            }
+
+            if (arg is "-xz" or "--xz")
+            {
+                xzOutput = true;
                 continue;
             }
 
@@ -208,8 +216,8 @@ public sealed record CliOptions(
             return null!;
         }
 
-        if ((tree && !lines) || (depth is not null && !tree) ||
-            (lines && (outputOptionUsed || zipOutput || mini || copyOptionUsed))) return null!;
+        if ((tree && !lines) || (depth is not null && !tree) || (zipOutput && xzOutput) ||
+            (lines && (outputOptionUsed || zipOutput || xzOutput || mini || copyOptionUsed))) return null!;
 
         return new CliOptions(
             root,
@@ -223,6 +231,7 @@ public sealed record CliOptions(
             all,
             useGitignore,
             zipOutput,
+            xzOutput,
             copyToClipboard,
             envProbe,
             docs,
@@ -280,6 +289,7 @@ public sealed record CliOptions(
           --depth <N>               Show folders through depth N (root is 0); requires --tree
           --use-gitignore           Exclude paths matched by .gitignore files
           --zip                     Write a maximum-compression ZIP archive
+          -xz, --xz                Write XZ-compressed Base64 text (ASCII)
           --copy, --clipboard       Copy the output file to the system clipboard (default)
           --no-copy, --no-clipboard
                                     Do not copy the output file to the clipboard
@@ -294,6 +304,7 @@ public sealed record CliOptions(
           codecat .
           codecat . -o context.txt
           codecat . --zip
+          codecat . -xz
           codecat . --no-copy
           codecat --env-probe
           codecat D:\\Git\\my-app -o out\\concat.txt

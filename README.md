@@ -123,6 +123,7 @@ codecat . --max-file-bytes 250000  # skip larger files
 codecat . --extensions cs,csproj   # include only .cs and .csproj files
 codecat . --mini                   # compact output plus safe minification
 codecat . --zip                    # write concat.zip with maximum ZIP compression
+codecat . -xz                      # write ASCII XZ + Base64 as concat.xz.b64
 codecat . --all                    # include broader optional source/docs files
 codecat . --use-gitignore          # also apply .gitignore exclusions
 codecat . --no-copy                # write output without copying it to the clipboard
@@ -134,6 +135,14 @@ codecat --version
 After writing the output file, `codecat` automatically copies it to the system clipboard. Use `--no-copy` to disable this. Clipboard copy first uses tmux/OSC 52 when running in SSH or tmux, so remote sessions can copy into the local terminal clipboard. Local fallback tools are `clip.exe` on Windows, `pbcopy` on macOS, and `wl-copy`, `xclip`, or `xsel` on Linux.
 
 Use `--zip` to write the text output into a maximum-compression ZIP archive. With the default output path, `codecat . --zip` writes `concat.zip` containing `concat.txt`; with `-o context.txt --zip`, it writes `context.zip` containing `context.txt`.
+
+Use `-xz` (or `--xz`) to write XZ-compressed output as Base64 text. The first line is `CODECAT-XZ-BASE64/1`, followed by a blank line and the Base64 payload. The default output is `concat.xz.b64`; `-o context.txt -xz` writes `context.xz.b64`. The file contains only ASCII characters. Decode and decompress it before giving the source text to an LLM. On Linux, for example:
+
+```bash
+tail -n +3 concat.xz.b64 | base64 -d | xz -dc > concat.txt
+```
+
+`--zip` and `-xz` cannot be used together.
 
 Use `codecat --env-probe` to see the detected OS, Linux distribution, terminal, tmux/SSH state, and clipboard strategy order. For SSH inside tmux, tmux and the local terminal must allow OSC 52 clipboard forwarding.
 

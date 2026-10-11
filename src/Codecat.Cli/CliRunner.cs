@@ -59,7 +59,9 @@ public sealed class CliRunner(
         var requestedOutputPath = options.Lines ? null : Path.GetFullPath(options.OutputPath);
         var outputPath = options.ZipOutput
             ? ResolveZipArchivePath(requestedOutputPath!)
-            : requestedOutputPath;
+            : options.XzOutput
+                ? ResolveXzBase64Path(requestedOutputPath!)
+                : requestedOutputPath;
         var zipEntryName = options.ZipOutput
             ? ResolveZipEntryName(requestedOutputPath!)
             : string.Empty;
@@ -78,6 +80,10 @@ public sealed class CliRunner(
             if (options.ZipOutput)
             {
                 Console.Error.WriteLine($"zip: enabled ({zipEntryName})");
+            }
+            if (options.XzOutput)
+            {
+                Console.Error.WriteLine("xz: enabled (Base64 text)");
             }
         }
 
@@ -108,9 +114,9 @@ public sealed class CliRunner(
             try
             {
                 var textOutputPath = outputPath;
-                if (options.ZipOutput)
+                if (options.ZipOutput || options.XzOutput)
                 {
-                    tempOutputPath = Path.Combine(Path.GetTempPath(), $"codecat-{Guid.NewGuid():N}-{zipEntryName}");
+                    tempOutputPath = Path.Combine(Path.GetTempPath(), $"codecat-{Guid.NewGuid():N}.txt");
                     textOutputPath = tempOutputPath;
                 }
 
@@ -119,6 +125,10 @@ public sealed class CliRunner(
                 if (options.ZipOutput)
                 {
                     ZipArchiveWriter.WriteSingleFileArchive(textOutputPath!, outputPath!, zipEntryName);
+                }
+                else if (options.XzOutput)
+                {
+                    XzBase64Writer.Write(textOutputPath!, outputPath!);
                 }
             }
             finally
@@ -159,6 +169,13 @@ public sealed class CliRunner(
         return string.Equals(Path.GetExtension(requestedOutputPath), ".zip", StringComparison.OrdinalIgnoreCase)
             ? requestedOutputPath
             : Path.ChangeExtension(requestedOutputPath, ".zip");
+    }
+
+    private static string ResolveXzBase64Path(string requestedOutputPath)
+    {
+        return requestedOutputPath.EndsWith(".xz.b64", StringComparison.OrdinalIgnoreCase)
+            ? requestedOutputPath
+            : Path.ChangeExtension(requestedOutputPath, ".xz.b64");
     }
 
     private static string ResolveZipEntryName(string requestedOutputPath)
