@@ -2,4 +2,5 @@ bin/
 obj/
 artifacts/
 concat*.txt
+concat*.xz.b64
 *.pdb

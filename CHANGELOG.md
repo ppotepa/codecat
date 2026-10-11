@@ -2,6 +2,12 @@
 
 All notable changes to `codecat` are documented in this file.
 
+## [0.39] - 2026-10-11
+
+### Added
+
+- Added `-xz` / `--xz` output as XZ-compressed, ASCII-only Base64 text.
+
 ## [0.38] - 2026-10-11
 
 ### Added
@@ -129,6 +135,7 @@ All notable changes to `codecat` are documented in this file.
 - Added Windows MSI installer that installs `Codecat.exe` into `Program Files\Codecat` and adds it to `PATH`.
 - Added repository structure under `src/Codecat`, solution file, CI workflow, MIT license, editor config, and release build script.
 
+[0.39]: https://github.com/ppotepa/codecat/releases/tag/v0.39
 [0.37]: https://github.com/ppotepa/codecat/releases/tag/v0.37
 [0.38]: https://github.com/ppotepa/codecat/releases/tag/v0.38
 [0.36]: https://github.com/ppotepa/codecat/releases/tag/v0.36
