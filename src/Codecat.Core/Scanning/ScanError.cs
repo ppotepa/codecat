@@ -7,7 +7,10 @@ public enum ScanErrorKind
     FileEnumeration,
     Gitignore,
     ComputeHash,
-    MetricsCalculation
+    MetricsCalculation,
+    TooLarge,
+    Binary,
+    PreviousOutput
 }
 
 public sealed record ScanError(ScanErrorKind Kind, string Path, string Message);

@@ -18,7 +18,7 @@ public static class LineReportWriter
         if (tree)
         {
             output.WriteLine("TREE  FILES  LINES");
-            var folders = new Dictionary<string, (long Files, long Lines)>(StringComparer.OrdinalIgnoreCase)
+            var folders = new Dictionary<string, (long Files, long Lines)>(PathRules.Comparer)
             {
                 ["."] = (0, 0)
             };
@@ -34,7 +34,8 @@ public static class LineReportWriter
                 }
             }
 
-            foreach (var folder in folders.Keys.OrderBy(path => path == "." ? "" : path, StringComparer.OrdinalIgnoreCase))
+            foreach (var folder in folders.Keys.OrderBy(path => path == "." ? "" : path, StringComparer.OrdinalIgnoreCase)
+                         .ThenBy(path => path, StringComparer.Ordinal))
             {
                 var level = folder == "." ? 0 : folder.Count(character => character == '/') + 1;
                 if (depth is not null && level > depth) continue;

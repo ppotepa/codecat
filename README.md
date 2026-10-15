@@ -251,6 +251,8 @@ toml
 docs
 ```
 
+Each built-in plugin has its own source file under `src/Codecat.Plugins/BuiltIns/`. The shared matcher lives under `src/Codecat.Plugins/Matching/`, and `BuiltInPluginCatalog` is the explicit registration list. New plugins are compiled into the executable so Native AOT can include them without runtime assembly loading.
+
 ## Current Scope
 
 This is the first working version. It focuses on:
@@ -273,12 +275,15 @@ installer/wix/      Windows MSI definition
 scripts/            release/build scripts
 scripts/install-linux.sh
                     Linux install/uninstall helper for per-user and global installs
-src/Codecat.Core/   domain/contracts + options/models/interfaces
+src/Codecat.Core/   models and contracts
+src/Codecat.Plugins/
+                    one compiled definition per built-in plugin + shared matcher
 src/Codecat.Application/
-                    orchestrator + scan command workflow
+                    scan policy and application workflow
 src/Codecat.Infrastructure/
-                    plugins, minification, fs helpers, reader
-src/Codecat.Cli/     entrypoint + CLI args + host setup
+                    filesystem adapters and minifiers
+src/Codecat.Cli/     command parsing, output, host composition
+tests/Codecat.Tests/ plugin and scanning regression tests
 ```
 
 ## License

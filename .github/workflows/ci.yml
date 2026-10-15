@@ -7,6 +7,36 @@ on:
     branches: [main]
 
 jobs:
+  test-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            9.0.x
+            10.0.x
+
+      - name: Restore
+        run: dotnet restore Codecat.slnx
+
+      - name: Test
+        run: dotnet test Codecat.slnx --configuration Release --no-restore
+
+      - name: Install Native AOT prerequisites
+        run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev
+
+      - name: Restore Linux Native AOT target
+        run: dotnet restore src/Codecat.Cli/Codecat.Cli.csproj --runtime linux-x64
+
+      - name: Publish and smoke test Native AOT
+        run: |
+          dotnet publish src/Codecat.Cli/Codecat.Cli.csproj --configuration Release --runtime linux-x64 --no-restore -p:PublishAot=true -p:PublishDir=../../artifacts/ci/linux-x64/
+          ./artifacts/ci/linux-x64/Codecat --version
+
   build:
     runs-on: windows-latest
 
@@ -17,13 +47,18 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: |
+            9.0.x
+            10.0.x
 
       - name: Restore
         run: dotnet restore Codecat.slnx
 
-      - name: Build
-        run: dotnet build src/Codecat.Cli/Codecat.Cli.csproj --configuration Release --no-restore
+      - name: Test
+        run: dotnet test Codecat.slnx --configuration Release --no-restore
+
+      - name: Restore Windows Native AOT target
+        run: dotnet restore src/Codecat.Cli/Codecat.Cli.csproj --runtime win-x64
 
       - name: Publish Native AOT
         run: dotnet publish src/Codecat.Cli/Codecat.Cli.csproj --configuration Release --runtime win-x64 --no-restore

@@ -1,7 +1,5 @@
 using System.Text;
 using System.IO;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 using Codecat.Scanning;
 
 namespace Codecat.Output;
@@ -16,51 +14,14 @@ public sealed class CodecatWriter : IScanResultWriter
             Directory.CreateDirectory(directory);
         }
 
-        var outputBuffer = new StringBuilder();
         using var writer = new StreamWriter(outputPath, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-        using var tee = new TeeTextWriter(writer, outputBuffer);
         if (mini)
         {
-            WriteMini(root, result, tee);
+            WriteMini(root, result, writer);
         }
         else
         {
-            WriteDefault(root, result, tee);
-        }
-
-        TryCopyToClipboardIfConcat(outputBuffer.ToString(), outputPath);
-    }
-
-    private static void TryCopyToClipboardIfConcat(string output, string outputPath)
-    {
-        try
-        {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
-            if (!Path.GetFileName(outputPath).Equals("concat.txt", StringComparison.OrdinalIgnoreCase))
-            {
-                return;
-            }
-
-            using var process = new Process();
-            process.StartInfo = new ProcessStartInfo
-            {
-                FileName = "cmd.exe",
-                Arguments = "/c clip",
-                RedirectStandardInput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-            process.Start();
-            process.StandardInput.Write(output);
-            process.StandardInput.Close();
-            process.WaitForExit();
-        }
-        catch
-        {
+            WriteDefault(root, result, writer);
         }
     }
 
@@ -179,30 +140,4 @@ public sealed class CodecatWriter : IScanResultWriter
             .Replace("\r", "\n", StringComparison.Ordinal);
     }
 
-    private sealed class TeeTextWriter(TextWriter primary, StringBuilder buffer) : TextWriter
-    {
-        public override Encoding Encoding => primary.Encoding;
-
-        public override void Write(char value)
-        {
-            primary.Write(value);
-            buffer.Append(value);
-        }
-
-        public override void Write(string? value)
-        {
-            primary.Write(value);
-            buffer.Append(value);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                primary.Dispose();
-            }
-
-            base.Dispose(disposing);
-        }
-    }
 }

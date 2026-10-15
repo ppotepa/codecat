@@ -1,18 +1,20 @@
+using System.Text;
+
 namespace Codecat.Scanning;
 
 public sealed class FileLineCounter : IFileLineCounter
 {
     public async Task<long> CountAsync(string path, CancellationToken cancellationToken)
     {
-        await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
-            16_384, FileOptions.Asynchronous | FileOptions.SequentialScan);
-        var buffer = new byte[16_384];
+        using var reader = new StreamReader(path, Encoding.UTF8, detectEncodingFromByteOrderMarks: true,
+            bufferSize: 16_384);
+        var buffer = new char[16_384];
         long lines = 0;
         var hasContent = false;
         var previousWasCr = false;
         var lastWasNewline = false;
         int read;
-        while ((read = await stream.ReadAsync(buffer, cancellationToken)) > 0)
+        while ((read = await reader.ReadAsync(buffer.AsMemory(), cancellationToken)) > 0)
         {
             hasContent = true;
             foreach (var value in buffer.AsSpan(0, read))

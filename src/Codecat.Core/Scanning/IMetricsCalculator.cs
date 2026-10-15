@@ -4,5 +4,5 @@ public sealed record FileMetrics(int Lines, long Bytes, string Sha256, long Orig
 
 public interface IMetricsCalculator
 {
-    FileMetrics Calculate(string fullPath, string content, string originalContent);
+    FileMetrics Calculate(string content, string originalContent, long originalBytes, string originalSha256);
 }

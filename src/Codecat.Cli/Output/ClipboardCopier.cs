@@ -3,9 +3,9 @@ using System.Text;
 
 namespace Codecat.Output;
 
-internal static class ClipboardCopier
+public sealed class ClipboardCopier : IClipboardService
 {
-    public static ClipboardCopyResult CopyFile(string path)
+    public ClipboardCopyResult CopyFile(string path)
     {
         if (!File.Exists(path))
         {
@@ -46,7 +46,7 @@ internal static class ClipboardCopier
             $"could not copy to clipboard; tried: {string.Join(", ", attempted)}{FormatFailures(failures)}");
     }
 
-    public static IReadOnlyList<string> GetStrategyNames(ClipboardEnvironment environment)
+    internal static IReadOnlyList<string> GetStrategyNames(ClipboardEnvironment environment)
     {
         return GetCandidates(environment).Select(candidate => candidate.Name).ToArray();
     }
@@ -227,11 +227,4 @@ internal static class ClipboardCopier
         Process,
         Osc52
     }
-}
-
-internal sealed record ClipboardCopyResult(bool Success, string Message)
-{
-    public static ClipboardCopyResult Copied(string tool) => new(true, $"copied output to clipboard using {tool}");
-
-    public static ClipboardCopyResult Failed(string message) => new(false, message);
 }

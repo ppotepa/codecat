@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\\Codecat.Core\\Codecat.Core.csproj" />
-    <ProjectReference Include="..\\Codecat.Infrastructure\\Codecat.Infrastructure.csproj" />
+    <ProjectReference Include="..\\Codecat.Plugins\\Codecat.Plugins.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
   </ItemGroup>
 </Project>

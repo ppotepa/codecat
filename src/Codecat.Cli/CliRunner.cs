@@ -7,8 +7,9 @@ using Microsoft.Extensions.Logging;
 namespace Codecat.Cli;
 
 public sealed class CliRunner(
-    Func<bool, bool, IScanOrchestrator> orchestratorFactory,
+    Func<PluginSelection, IScanOrchestrator> orchestratorFactory,
     IScanResultWriter writer,
+    IClipboardService clipboardService,
     IOptions<ScanConfiguration> configuration,
     ILogger<CliRunner> logger)
 {
@@ -16,20 +17,20 @@ public sealed class CliRunner(
     {
         if (args is ["--version"])
         {
-            Console.WriteLine(CliOptions.GetVersion());
+            Console.WriteLine(CliHelp.GetVersion());
             return 0;
         }
 
         if (args is ["-h"] or ["--help"])
         {
-            CliOptions.PrintUsage();
+            CliHelp.PrintUsage();
             return 0;
         }
 
         var options = CliOptions.Parse(args, configuration.Value);
         if (options is null)
         {
-            CliOptions.PrintUsage();
+            CliHelp.PrintUsage();
             return 1;
         }
 
@@ -41,11 +42,11 @@ public sealed class CliRunner(
         }
 
         var defaults = configuration.Value;
-        var includeAllPlugins = defaults.DefaultAllPlugins || options.All;
-        var plugins = new PluginRegistry(includeAllPlugins, options.Docs).GetPlugins();
+        var pluginSelection = new PluginSelection(defaults.DefaultAllPlugins || options.All, options.Docs);
+        var plugins = new PluginRegistry(pluginSelection).GetPlugins();
         if (options.ListPlugins)
         {
-            CliOptions.PrintPlugins(plugins);
+            CliHelp.PrintPlugins(plugins);
             return 0;
         }
 
@@ -99,7 +100,7 @@ public sealed class CliRunner(
                 options.ExtensionFilter,
                 options.Lines);
 
-            var orchestrator = orchestratorFactory(options.All, options.Docs);
+            var orchestrator = orchestratorFactory(pluginSelection);
             var result = await orchestrator.ScanAsync(root, outputPath, scanOptions, progress =>
             {
                 logger.LogInformation("scanning: dirs={Directories} seen={Seen} included={Included} skipped={Skipped} current={Current}", progress.DirectoriesVisited, progress.FilesSeen, progress.FilesIncluded, progress.ItemsSkipped, progress.CurrentPath);
@@ -130,6 +131,20 @@ public sealed class CliRunner(
                 {
                     XzBase64Writer.Write(textOutputPath!, outputPath!);
                 }
+
+                if (options.CopyToClipboard)
+                {
+                    var clipboardSourcePath = options.ZipOutput ? textOutputPath! : outputPath!;
+                    var copyResult = clipboardService.CopyFile(clipboardSourcePath);
+                    if (!copyResult.Success)
+                    {
+                        Console.Error.WriteLine($"warning: {copyResult.Message}");
+                    }
+                    else
+                    {
+                        Console.WriteLine(copyResult.Message);
+                    }
+                }
             }
             finally
             {
@@ -137,18 +152,6 @@ public sealed class CliRunner(
             }
 
             Console.WriteLine($"wrote {result.FilesIncluded} files to {outputPath}");
-            if (options.CopyToClipboard)
-            {
-                var copyResult = ClipboardCopier.CopyFile(outputPath!);
-                if (!copyResult.Success)
-                {
-                    Console.Error.WriteLine($"warning: {copyResult.Message}");
-                }
-                else
-                {
-                    Console.WriteLine(copyResult.Message);
-                }
-            }
 
             if (!options.Quiet)
             {
