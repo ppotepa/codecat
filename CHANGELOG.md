@@ -2,6 +2,23 @@
 
 All notable changes to `codecat` are documented in this file.
 
+## [0.40] - 2026-10-15
+
+### Changed
+
+- Split built-in plugin definitions into separate files and added explicit rule conflict validation.
+- Split scanning into traversal, file processing, and per-scan session components; removed the duplicate legacy application tree.
+- Moved scan policy into Application and documented project boundaries and plugin contribution steps.
+- Routed CLI diagnostics to stderr and kept clipboard handling outside the output writer.
+
+### Fixed
+
+- Made each scan use fresh state and skip symlinked files and directories.
+- Enforced file size limits during reads, validated text decoding, and kept byte counts and SHA-256 tied to the original bytes.
+- Added UTF-32 BOM decoding and binary detection while preserving UTF-8 and UTF-16 support.
+- Kept CSS and XML source unchanged when safe minification is unavailable.
+- Added regression coverage for plugin matching, scanner safety, CLI output, and configuration loading.
+
 ## [0.39] - 2026-10-11
 
 ### Added
@@ -135,6 +152,7 @@ All notable changes to `codecat` are documented in this file.
 - Added Windows MSI installer that installs `Codecat.exe` into `Program Files\Codecat` and adds it to `PATH`.
 - Added repository structure under `src/Codecat`, solution file, CI workflow, MIT license, editor config, and release build script.
 
+[0.40]: https://github.com/ppotepa/codecat/releases/tag/v0.40
 [0.39]: https://github.com/ppotepa/codecat/releases/tag/v0.39
 [0.37]: https://github.com/ppotepa/codecat/releases/tag/v0.37
 [0.38]: https://github.com/ppotepa/codecat/releases/tag/v0.38

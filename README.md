@@ -68,9 +68,9 @@ The script restores the repo-local WiX tool, publishes a Native AOT build, creat
 This creates:
 
 ```text
-artifacts/release/codecat-0.38-win-x64/
-artifacts/release/codecat-0.38-win-x64.zip
-artifacts/release/codecat-0.38-win-x64.msi
+artifacts/release/codecat-0.40-win-x64/
+artifacts/release/codecat-0.40-win-x64.zip
+artifacts/release/codecat-0.40-win-x64.msi
 ```
 
 The MSI installs `Codecat.exe` into `Program Files\Codecat` and adds that folder to the system `PATH`.
@@ -144,7 +144,7 @@ tail -n +3 concat.xz.b64 | base64 -d | xz -dc > concat.txt
 
 `--zip` and `-xz` cannot be used together.
 
-To push a branch or tag to both configured repositories, run `scripts/push-both.sh <ref>`. The script pushes to `clickbytes/codecat` and `ppotepa/codecat`, switching the active `gh` account as needed. For example, `scripts/push-both.sh main v0.39` pushes the branch and release tag to both repositories.
+To push a branch or tag to both configured repositories, run `scripts/push-both.sh <ref>`. The script pushes to `clickbytes/codecat` and `ppotepa/codecat`, switching the active `gh` account as needed. For example, `scripts/push-both.sh main v0.40` pushes the branch and release tag to both repositories.
 
 Use `codecat --env-probe` to see the detected OS, Linux distribution, terminal, tmux/SSH state, and clipboard strategy order. For SSH inside tmux, tmux and the local terminal must allow OSC 52 clipboard forwarding.
 
